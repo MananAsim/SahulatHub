@@ -1,0 +1,311 @@
+.container {
+    min-height: calc(100vh - 70px);
+    background-color: var(--bg-color);
+    padding-bottom: 64px;
+}
+
+.header {
+    background: var(--surface-color);
+    border-bottom: 1px solid var(--border-color);
+    padding: 32px 24px;
+}
+
+.headerContent {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.backButton {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 16px;
+    padding: 0;
+    transition: color 0.2s ease;
+}
+
+.backButton:hover {
+    color: var(--primary-blue);
+}
+
+.headerContent h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    margin: 0 0 8px;
+    color: var(--text-main);
+}
+
+.headerContent p {
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+.mainContent {
+    max-width: 1000px;
+    margin: 40px auto 0;
+    padding: 0 24px;
+}
+
+.profileGrid {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: 32px;
+}
+
+/* Left Column / User Card */
+.leftCol {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.userCard {
+    padding: 32px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.avatarLarge {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-blue) 0%, #1d4ed8 100%);
+    color: white;
+    font-size: 3rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+    box-shadow: 0 12px 24px rgba(37, 99, 235, 0.2);
+}
+
+.userName {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--text-main);
+    margin: 0 0 12px;
+}
+
+.ratingBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #fef3c7;
+    color: #b45309;
+    padding: 6px 16px;
+    border-radius: 99px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-bottom: 32px;
+}
+
+.contactInfo {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 32px;
+    text-align: left;
+}
+
+.contactItem {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.contactIcon {
+    color: var(--primary-blue);
+    font-size: 1.1rem;
+    width: 20px;
+}
+
+.editBtn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.actionCard {
+    padding: 24px;
+}
+
+.logoutBtn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: var(--error);
+    border-color: #fee2e2;
+    background: #fef2f2;
+}
+
+.logoutBtn:hover {
+    background: #fee2e2;
+    color: var(--error);
+    border-color: #fccca7;
+}
+
+/* Right Column */
+.rightCol {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+.servicesCard,
+.reviewsCard {
+    padding: 32px;
+}
+
+.sectionHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 32px;
+}
+
+.sectionHeader h3 {
+    font-size: 1.35rem;
+    font-weight: 800;
+    margin: 0 0 4px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.sectionIcon {
+    color: var(--primary-blue);
+}
+
+.sectionHeader p {
+    color: var(--text-muted);
+    margin: 0;
+}
+
+/* Services Toggles */
+.servicesList {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.serviceRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background: #f8fafc;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+}
+
+.serviceRow:hover {
+    border-color: #cbd5e1;
+}
+
+.serviceName {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--text-main);
+}
+
+.toggleSwitch {
+    position: relative;
+    width: 52px;
+    height: 28px;
+    background: #e2e8f0;
+    border-radius: 99px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.activeSwitch {
+    background: var(--success);
+}
+
+.toggleKnob {
+    position: absolute;
+    top: 3px;
+    left: 4px;
+    width: 22px;
+    height: 22px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.activeSwitch .toggleKnob {
+    transform: translateX(22px);
+}
+
+/* Reviews */
+.reviewsList {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.reviewItem {
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.reviewItem:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.reviewTop {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.reviewerName {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--text-main);
+}
+
+.reviewDate {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.reviewStars {
+    color: #f59e0b;
+    margin-bottom: 12px;
+    display: flex;
+    gap: 2px;
+}
+
+.reviewText {
+    color: var(--text-muted);
+    font-style: italic;
+    line-height: 1.6;
+    margin: 0;
+}
+
+@media (max-width: 768px) {
+    .profileGrid {
+        grid-template-columns: 1fr;
+    }
+}

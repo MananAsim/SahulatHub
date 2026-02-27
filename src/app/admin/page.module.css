@@ -1,0 +1,143 @@
+.container {
+    min-height: calc(100vh - 70px);
+    background-color: var(--bg-color);
+    padding-bottom: 64px;
+}
+
+.header {
+    background: var(--surface-color);
+    border-bottom: 1px solid var(--border-color);
+    padding: 40px 24px;
+}
+
+.headerContent {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.headerContent h1 {
+    font-size: 2rem;
+    color: var(--text-main);
+    margin-bottom: 8px;
+}
+
+.headerContent p {
+    color: var(--text-muted);
+    font-size: 1.125rem;
+}
+
+.mainContent {
+    max-width: 1200px;
+    margin: 40px auto 0;
+    padding: 0 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+
+.statsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 24px;
+}
+
+.statCard {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 24px;
+}
+
+.statIcon {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+.statInfo h3 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0 0 4px;
+}
+
+.statInfo p {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    margin: 0;
+    font-weight: 500;
+}
+
+.panelsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 32px;
+}
+
+.panelsGrid h2 {
+    font-size: 1.25rem;
+    color: var(--text-main);
+    margin-bottom: 16px;
+}
+
+.panelCard {
+    padding: 0;
+}
+
+.list {
+    display: flex;
+    flex-direction: column;
+}
+
+.listItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.listItem:last-child {
+    border-bottom: none;
+}
+
+.listItem h4 {
+    margin: 0 0 4px;
+    font-size: 1.125rem;
+    color: var(--text-main);
+}
+
+.listItem p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+}
+
+.actions {
+    display: flex;
+    gap: 8px;
+}
+
+@media (max-width: 640px) {
+    .panelsGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .listItem {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    .actions {
+        width: 100%;
+    }
+
+    .actions button {
+        flex: 1;
+    }
+}

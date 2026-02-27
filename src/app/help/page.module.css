@@ -1,0 +1,135 @@
+.container {
+    min-height: calc(100vh - 70px);
+    background-color: var(--bg-color);
+}
+
+.heroSection {
+    background: var(--gradient-primary);
+    padding: 80px 24px;
+    color: white;
+    text-align: center;
+}
+
+.heroContent {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.heroContent h1 {
+    font-size: 3rem;
+    font-weight: 800;
+    margin-bottom: 16px;
+}
+
+.heroContent p {
+    font-size: 1.25rem;
+    opacity: 0.9;
+}
+
+.content {
+    max-width: 800px;
+    margin: -40px auto 0;
+    padding: 0 24px 80px;
+    position: relative;
+    z-index: 10;
+}
+
+.faqSection {
+    margin-bottom: 48px;
+}
+
+.faqSection h2 {
+    font-size: 2rem;
+    color: var(--text-main);
+    margin-bottom: 24px;
+    text-align: center;
+}
+
+.faqList {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.faqCard {
+    padding: 0;
+    overflow: hidden;
+}
+
+.question {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px;
+    cursor: pointer;
+    background-color: var(--surface-color);
+    transition: background-color var(--transition-fast);
+}
+
+.question:hover {
+    background-color: #f8fafc;
+}
+
+.question h3 {
+    font-size: 1.125rem;
+    color: var(--text-main);
+    margin: 0;
+    font-weight: 600;
+}
+
+.question svg {
+    color: var(--primary-blue);
+}
+
+.answer {
+    padding: 0 24px 24px;
+    border-top: 1px solid var(--border-color);
+    background-color: var(--surface-color);
+}
+
+.answer p {
+    margin: 24px 0 0;
+    color: var(--text-muted);
+    line-height: 1.6;
+}
+
+.supportBox {
+    background: white;
+    padding: 48px 24px;
+    text-align: center;
+    border-radius: 24px;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-color);
+}
+
+.supportBox h3 {
+    font-size: 1.5rem;
+    color: var(--text-main);
+    margin-bottom: 8px;
+}
+
+.supportBox p {
+    color: var(--text-muted);
+    margin-bottom: 24px;
+}
+
+.contactBtn {
+    display: inline-block;
+    background-color: var(--primary-blue);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color var(--transition-fast);
+}
+
+.contactBtn:hover {
+    background-color: var(--primary-hover);
+}
+
+@media (max-width: 768px) {
+    .heroContent h1 {
+        font-size: 2.5rem;
+    }
+}

@@ -1,0 +1,254 @@
+.container {
+    min-height: calc(100vh - 70px);
+    background-color: var(--bg-color);
+    padding-bottom: 64px;
+}
+
+.header {
+    background: var(--surface-color);
+    border-bottom: 1px solid var(--border-color);
+    padding: 32px 24px;
+}
+
+.headerContent {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.backButton {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 16px;
+    padding: 0;
+    transition: color 0.2s ease;
+}
+
+.backButton:hover {
+    color: var(--primary-blue);
+}
+
+.headerContent h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    margin: 0 0 8px;
+    color: var(--text-main);
+}
+
+.headerContent p {
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+.mainContent {
+    max-width: 1000px;
+    margin: 40px auto 0;
+    padding: 0 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+
+.summarySection {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+.balanceCard {
+    padding: 32px;
+    background: linear-gradient(135deg, var(--primary-blue) 0%, #1d4ed8 100%);
+    color: white;
+    border: none;
+}
+
+.balanceHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.balanceHeader h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    opacity: 0.9;
+}
+
+.cashIcon {
+    font-size: 2rem;
+    opacity: 0.8;
+}
+
+.balanceAmount {
+    font-size: 3.5rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+    line-height: 1;
+}
+
+.balanceSubtitle {
+    opacity: 0.8;
+    margin-bottom: 24px;
+    font-size: 0.95rem;
+}
+
+.balanceActions button {
+    background: white;
+    color: var(--primary-blue);
+    width: 100%;
+}
+
+.balanceActions button:hover {
+    background: #f8fafc;
+}
+
+.statsGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.statCard {
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex: 1;
+}
+
+.statIcon {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+.statInfo h4 {
+    font-size: 1.75rem;
+    font-weight: 800;
+    margin: 0 0 4px;
+    color: var(--text-main);
+}
+
+.statInfo p {
+    color: var(--text-muted);
+    margin: 0;
+    font-weight: 500;
+}
+
+.ledgerHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.ledgerHeader h2 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--text-main);
+    margin: 0;
+}
+
+.ledgerCard {
+    padding: 0;
+    overflow: hidden;
+}
+
+.transactionList {
+    display: flex;
+    flex-direction: column;
+}
+
+.transactionRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px;
+    border-bottom: 1px solid var(--border-color);
+    transition: background 0.2s ease;
+}
+
+.transactionRow:last-child {
+    border-bottom: none;
+}
+
+.transactionRow:hover {
+    background: #f8fafc;
+}
+
+.txInfo {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.txIconContainer {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.txDeposit {
+    background: #ecfdf5;
+    color: var(--success);
+}
+
+.txWithdraw {
+    background: #f1f5f9;
+    color: var(--text-muted);
+}
+
+.txIcon {
+    font-size: 1.25rem;
+}
+
+.txTitle {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0 0 4px;
+}
+
+.txSubtitle {
+    color: var(--text-muted);
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.txAmount {
+    font-size: 1.25rem;
+    font-weight: 800;
+}
+
+.amountPositive {
+    color: var(--success);
+}
+
+.amountNegative {
+    color: var(--text-main);
+}
+
+@media (max-width: 768px) {
+    .summarySection {
+        grid-template-columns: 1fr;
+    }
+
+    .transactionRow {
+        padding: 16px;
+    }
+}

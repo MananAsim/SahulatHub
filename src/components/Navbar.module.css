@@ -1,0 +1,120 @@
+.navbar {
+    background-color: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow-sm);
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.navLeft {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-blue);
+    text-decoration: none;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.links {
+    display: flex;
+    gap: 24px;
+}
+
+.link {
+    text-decoration: none;
+    color: var(--text-muted);
+    font-weight: 500;
+    transition: color var(--transition-fast);
+}
+
+.link:hover {
+    color: var(--primary-blue);
+}
+
+.navRight {
+    display: flex;
+    align-items: center;
+}
+
+.userMenu,
+.authLinks {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.greeting {
+    font-size: 0.875rem;
+    color: var(--text-main);
+    font-weight: 500;
+    display: none;
+}
+
+@media (min-width: 768px) {
+    .greeting {
+        display: inline-block;
+    }
+}
+
+.dashboardBtn {
+    text-decoration: none;
+    color: var(--text-main);
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: 8px;
+    transition: background var(--transition-fast);
+}
+
+.dashboardBtn:hover {
+    background-color: var(--bg-color);
+}
+
+.logoutBtn {
+    background: none;
+    border: none;
+    color: var(--error);
+    font-weight: 500;
+    cursor: pointer;
+    padding: 8px 16px;
+    border-radius: 8px;
+    transition: background var(--transition-fast);
+}
+
+.logoutBtn:hover {
+    background-color: #fef2f2;
+}
+
+.loginBtn {
+    text-decoration: none;
+    color: #fff;
+    background: var(--gradient-primary);
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 500;
+    box-shadow: var(--shadow-sm);
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.loginBtn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
