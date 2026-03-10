@@ -29,6 +29,11 @@ const taskSchema = new mongoose.Schema(
             type: Number, // in kilometers
             default: 10,
         },
+        budget: {
+            type: Number, // in PKR (Rs)
+            default: 0,
+            min: 0,
+        },
         status: {
             type: String,
             enum: ['open', 'assigned', 'in_progress', 'completed', 'cancelled'],

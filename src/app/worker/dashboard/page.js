@@ -6,6 +6,7 @@ import { apiFetch } from '@/lib/api';
 import { useRouter } from 'next/navigation';
 import Card from '@/components/Card';
 import Button from '@/components/Button';
+import AIChatbot from '@/components/AIChatbot';
 import styles from './page.module.css';
 import { FaMoneyBillWave, FaCheckCircle, FaStar, FaMapMarkerAlt, FaWifi, FaSpinner } from 'react-icons/fa';
 
@@ -271,6 +272,7 @@ export default function WorkerDashboard() {
                     </div>
                 </section>
             </main>
+            <AIChatbot role="worker" />
         </div>
     );
 }

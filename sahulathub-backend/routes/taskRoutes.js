@@ -6,6 +6,8 @@ const {
     updateTaskStatus,
     getUserTasks,
     getTaskById,
+    assignTask,
+    assignDemoTask,
 } = require('../controllers/taskController');
 const { protect } = require('../middleware/authMiddleware');
 const { authorizeRoles } = require('../middleware/roleMiddleware');
@@ -29,5 +31,11 @@ router.get('/:id', protect, getTaskById);
 
 // @route   PATCH /api/tasks/:id/status
 router.patch('/:id/status', protect, updateTaskStatus);
+
+// @route   POST /api/tasks/:id/assign — client picks a real DB worker
+router.post('/:id/assign', protect, authorizeRoles('client'), assignTask);
+
+// @route   POST /api/tasks/:id/assign-demo — client picks a CSV demo worker
+router.post('/:id/assign-demo', protect, authorizeRoles('client'), assignDemoTask);
 
 module.exports = router;

@@ -166,7 +166,7 @@ export function AuthProvider({ children }) {
 
     return (
         <AuthContext.Provider value={{
-            user, role, loading, setRole,
+            user, setUser, role, loading, setRole,
             // Registration
             register, registerWorker, registerWorkerWithPassword,
             // Login
