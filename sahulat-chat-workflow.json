@@ -1,0 +1,233 @@
+{
+    "name": "SahulatHub AI Chat",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "sahulat-chat",
+                "responseMode": "responseNode",
+                "options": {
+                    "allowedOrigins": "*"
+                }
+            },
+            "id": "webhook-trigger",
+            "name": "Chat Webhook",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2,
+            "position": [
+                240,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "role-field",
+                            "name": "role",
+                            "value": "={{ $json.body.role || 'client' }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "session-field",
+                            "name": "sessionId",
+                            "value": "={{ $json.body.sessionId || 'default' }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "messages-field",
+                            "name": "messages",
+                            "value": "={{ $json.body.messages }}",
+                            "type": "object"
+                        },
+                        {
+                            "id": "sysprompt-field",
+                            "name": "systemPrompt",
+                            "value": "={{ $json.body.systemPrompt }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "model-field",
+                            "name": "model",
+                            "value": "={{ $json.body.model || 'llama3.2' }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "last-message-field",
+                            "name": "lastUserMessage",
+                            "value": "={{ $json.body.messages && $json.body.messages.length > 0 ? $json.body.messages[$json.body.messages.length - 1].content : '' }}",
+                            "type": "string"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "set-fields",
+            "name": "Extract Fields",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3.4,
+            "position": [
+                460,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "model": "={{ $json.model }}",
+                "options": {
+                    "temperature": 0.7,
+                    "numPredict": 512
+                }
+            },
+            "id": "ollama-model",
+            "name": "Ollama Chat Model",
+            "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+            "typeVersion": 1,
+            "position": [
+                680,
+                480
+            ],
+            "credentials": {
+                "ollamaApi": {
+                    "id": "ollama-local",
+                    "name": "Ollama Local"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "sessionIdType": "customKey",
+                "sessionKey": "={{ $json.sessionId }}",
+                "contextWindowLength": 10
+            },
+            "id": "memory-buffer",
+            "name": "Conversation Memory",
+            "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+            "typeVersion": 1.3,
+            "position": [
+                680,
+                620
+            ]
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "={{ $json.lastUserMessage }}",
+                "messages": {
+                    "messageValues": [
+                        {
+                            "type": "SystemMessage",
+                            "message": "={{ $json.systemPrompt }}"
+                        }
+                    ]
+                },
+                "options": {
+                    "systemMessage": "={{ $json.systemPrompt }}"
+                }
+            },
+            "id": "ai-chain",
+            "name": "SahulatHub AI Agent",
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.5,
+            "position": [
+                680,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={{ JSON.stringify({ success: true, output: $json.text || $json.output || $json.response, source: 'n8n', model: $('Extract Fields').item.json.model, role: $('Extract Fields').item.json.role }) }}",
+                "options": {
+                    "responseHeaders": {
+                        "entries": [
+                            {
+                                "name": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "name": "Access-Control-Allow-Origin",
+                                "value": "*"
+                            }
+                        ]
+                    }
+                }
+            },
+            "id": "respond-node",
+            "name": "Respond to Webhook",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1.1,
+            "position": [
+                900,
+                300
+            ]
+        }
+    ],
+    "connections": {
+        "Chat Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Extract Fields",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Extract Fields": {
+            "main": [
+                [
+                    {
+                        "node": "SahulatHub AI Agent",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "SahulatHub AI Agent": {
+            "main": [
+                [
+                    {
+                        "node": "Respond to Webhook",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Ollama Chat Model": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "SahulatHub AI Agent",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Conversation Memory": {
+            "ai_memory": [
+                [
+                    {
+                        "node": "SahulatHub AI Agent",
+                        "type": "ai_memory",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1",
+        "saveManualExecutions": true,
+        "callerPolicy": "workflowsFromSameOwner"
+    },
+    "meta": {
+        "instanceId": "sahulathub-local",
+        "templateId": "sahulat-chat-v1"
+    }
+}

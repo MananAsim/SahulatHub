@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const rateLimit = require('express-rate-limit');
 const connectDB = require('./config/db');
 
 // ─── Connect to MongoDB ────────────────────────────────────────────────────────
@@ -18,17 +19,37 @@ const corsOptions = {
     allowedHeaders: ['Content-Type', 'Authorization', 'x-dev-role', 'x-dev-user-id'],
 };
 app.use(cors(corsOptions));
-// Explicitly handle preflight for all routes
 app.options('*', cors(corsOptions));
 
 // ─── Core Middleware ───────────────────────────────────────────────────────────
-app.use(express.json());
+app.use(express.json({ limit: '10kb' }));       // Limit body size
 app.use(express.urlencoded({ extended: true }));
 app.use(helmet());
 
 if (process.env.NODE_ENV !== 'test') {
     app.use(morgan('dev'));
 }
+
+// ─── Rate Limiting ─────────────────────────────────────────────────────────────
+// Auth routes: max 20 requests per 15 minutes per IP
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 20,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { success: false, message: 'Too many requests, please try again after 15 minutes.' },
+    skip: () => process.env.DEV_MODE === 'true',  // Skip in dev mode
+});
+
+// Match/AI routes: max 60 requests per minute per IP
+const matchLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 60,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { success: false, message: 'Too many match requests, slow down.' },
+    skip: () => process.env.DEV_MODE === 'true',
+});
 
 // ─── Startup Warning ──────────────────────────────────────────────────────────
 if (process.env.DEV_MODE === 'true') {
@@ -37,16 +58,18 @@ if (process.env.DEV_MODE === 'true') {
     console.log('⚠️   DEV_MODE is ENABLED — JWT auth is BYPASSED');
     console.log('⚠️   Use x-dev-role header to simulate roles (client/worker/admin)');
     console.log('⚠️   Use x-dev-user-id header to simulate a specific user ID');
+    console.log('⚠️   Rate limiting is DISABLED in dev mode');
     console.log('⚠️   DO NOT use this mode in production!');
     console.log('⚠️  ─────────────────────────────────────────────────────────');
     console.log('');
 }
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
-app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/api/auth', authLimiter, require('./routes/authRoutes'));
 app.use('/api/tasks', require('./routes/taskRoutes'));
 app.use('/api/workers', require('./routes/workerRoutes'));
-app.use('/api/match', require('./routes/matchRoutes'));
+app.use('/api/match', matchLimiter, require('./routes/matchRoutes'));
+app.use('/api/reviews', require('./routes/reviewRoutes'));
 
 // DEV routes — only available when DEV_MODE=true
 if (process.env.DEV_MODE === 'true') {
@@ -59,9 +82,10 @@ app.get('/api/health', (req, res) => {
     res.json({
         success: true,
         project: 'SahulatHub',
-        version: '1.0.0',
+        version: '1.1.0',
         status: 'running',
         dev_mode: process.env.DEV_MODE === 'true',
+        ai_service: process.env.AI_SERVICE_URL || 'http://localhost:8001',
         timestamp: new Date().toISOString(),
     });
 });

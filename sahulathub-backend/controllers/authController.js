@@ -211,4 +211,44 @@ const getMe = async (req, res) => {
     }
 };
 
-module.exports = { register, login, workerLogin, getMe };
+// @desc    Update logged-in user's profile (name, location, skills, availability)
+// @route   PUT /api/auth/profile
+// @access  Private
+const updateProfile = async (req, res) => {
+    try {
+        const { name, location, skills, availability } = req.body;
+
+        const user = await User.findById(req.user.id);
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        if (name) user.name = name.trim();
+        if (location) user.location = location;
+        if (skills && Array.isArray(skills)) user.skills = skills;
+        if (availability !== undefined) user.availability = Boolean(availability);
+
+        await user.save();
+
+        res.status(200).json({
+            success: true,
+            message: 'Profile updated successfully',
+            data: {
+                _id: user._id,
+                name: user.name,
+                email: user.email,
+                phone: user.phone,
+                role: user.role,
+                rating: user.rating,
+                location: user.location,
+                skills: user.skills,
+                availability: user.availability,
+            },
+        });
+    } catch (error) {
+        console.error('Update Profile Error:', error.message);
+        res.status(500).json({ success: false, message: 'Server error', error: error.message });
+    }
+};
+
+module.exports = { register, login, workerLogin, getMe, updateProfile };

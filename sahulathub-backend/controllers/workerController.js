@@ -55,4 +55,47 @@ const getWorkerStats = async (req, res) => {
     }
 };
 
-module.exports = { getWorkerStats };
+// @desc    Toggle the logged-in worker's availability
+// @route   PATCH /api/workers/me/availability
+// @access  Private (worker only)
+const toggleAvailability = async (req, res) => {
+    try {
+        const worker = await User.findById(req.user.id);
+        if (!worker) {
+            return res.status(404).json({ success: false, message: 'Worker not found' });
+        }
+        // Allow explicit set via body, or just toggle
+        const newStatus =
+            req.body.availability !== undefined ? Boolean(req.body.availability) : !worker.availability;
+        worker.availability = newStatus;
+        await worker.save();
+        res.status(200).json({
+            success: true,
+            message: `Availability set to ${newStatus ? 'online' : 'offline'}`,
+            data: { availability: newStatus },
+        });
+    } catch (error) {
+        console.error('Toggle Availability Error:', error.message);
+        res.status(500).json({ success: false, message: 'Server error', error: error.message });
+    }
+};
+
+// @desc    Get a public worker profile by ID
+// @route   GET /api/workers/:id
+// @access  Public
+const getWorkerProfile = async (req, res) => {
+    try {
+        const worker = await User.findById(req.params.id).select(
+            'name rating skills availability location createdAt'
+        );
+        if (!worker || worker.role === undefined) {
+            return res.status(404).json({ success: false, message: 'Worker not found' });
+        }
+        res.status(200).json({ success: true, data: worker });
+    } catch (error) {
+        console.error('Get Worker Profile Error:', error.message);
+        res.status(500).json({ success: false, message: 'Server error', error: error.message });
+    }
+};
+
+module.exports = { getWorkerStats, toggleAvailability, getWorkerProfile };

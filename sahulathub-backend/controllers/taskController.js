@@ -1,4 +1,5 @@
 const Task = require('../models/Task');
+const User = require('../models/User');
 
 // @desc    Create a new task
 // @route   POST /api/tasks
@@ -154,4 +155,93 @@ const getTaskById = async (req, res) => {
     }
 };
 
-module.exports = { createTask, getAvailableTasks, getWorkerTasks, updateTaskStatus, getUserTasks, getTaskById };
+
+// @desc    Assign a task to a specific worker
+// @route   POST /api/tasks/:id/assign
+// @access  Private (client only)
+const assignTask = async (req, res) => {
+    try {
+        const { worker_id, budget } = req.body;
+
+        if (!worker_id) {
+            return res.status(400).json({ success: false, message: 'worker_id is required' });
+        }
+
+        const task = await Task.findById(req.params.id);
+        if (!task) {
+            return res.status(404).json({ success: false, message: 'Task not found' });
+        }
+
+        // Only the client who created the task can assign it
+        if (task.client_id.toString() !== req.user.id.toString()) {
+            return res.status(403).json({ success: false, message: 'Not authorized to assign this task' });
+        }
+
+        if (task.status !== 'open') {
+            return res.status(400).json({
+                success: false,
+                message: `Task is already ${task.status} and cannot be assigned`,
+            });
+        }
+
+        // Verify the worker exists
+        const worker = await User.findById(worker_id);
+        if (!worker || worker.role !== 'worker') {
+            return res.status(404).json({ success: false, message: 'Worker not found' });
+        }
+
+        // Assign task
+        task.assigned_worker_id = worker_id;
+        task.status = 'assigned';
+        if (budget !== undefined) task.budget = budget;
+        await task.save();
+
+        // Mark worker as unavailable
+        await User.findByIdAndUpdate(worker_id, { availability: false });
+
+        const populated = await Task.findById(task._id)
+            .populate('client_id', 'name email')
+            .populate('assigned_worker_id', 'name email phone rating skills');
+
+        res.status(200).json({
+            success: true,
+            message: `Task assigned to ${worker.name}`,
+            data: populated,
+        });
+    } catch (error) {
+        console.error('Assign Task Error:', error.message);
+        res.status(500).json({ success: false, message: 'Server error', error: error.message });
+    }
+};
+
+// @desc    Assign a task to a CSV demo worker (no DB user record needed)
+// @route   POST /api/tasks/:id/assign-demo
+// @access  Private (client only)
+const assignDemoTask = async (req, res) => {
+    try {
+        const { worker_name, worker_skill, worker_id } = req.body;
+
+        const task = await Task.findById(req.params.id);
+        if (!task) return res.status(404).json({ success: false, message: 'Task not found' });
+
+        if (task.client_id.toString() !== req.user.id.toString()) {
+            return res.status(403).json({ success: false, message: 'Not authorized' });
+        }
+
+        task.status = 'assigned';
+        task.demo_worker = { worker_id, worker_name, worker_skill }; // store as metadata
+        await task.save();
+
+        res.status(200).json({
+            success: true,
+            message: `Task assigned to demo worker: ${worker_name}`,
+            data: task,
+        });
+    } catch (error) {
+        console.error('Assign Demo Task Error:', error.message);
+        res.status(500).json({ success: false, message: 'Server error', error: error.message });
+    }
+};
+
+module.exports = { createTask, getAvailableTasks, getWorkerTasks, updateTaskStatus, getUserTasks, getTaskById, assignTask, assignDemoTask };
+
