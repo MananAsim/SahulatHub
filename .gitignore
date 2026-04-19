@@ -39,3 +39,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Backend dependencies
+sahulathub-backend/node_modules/
+
+# Python AI service
+sahulathub-ai/__pycache__/
+sahulathub-ai/pip_log.txt
+*.pyc

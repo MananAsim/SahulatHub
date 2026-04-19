@@ -13,6 +13,7 @@ function LoginContent() {
     const [isLogin, setIsLogin] = useState(true);
 
     // Client states
+    const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [clientLoading, setClientLoading] = useState(false);
@@ -25,7 +26,12 @@ function LoginContent() {
     const [workerLoading, setWorkerLoading] = useState(false);
     const [workerError, setWorkerError] = useState('');
 
-    const { login, loginWithFacebook, loginWithGoogle, initializeRecaptcha, sendVerificationCode, verifyOTP, registerWorkerWithPassword, loginWorkerWithPassword } = useAuth();
+    const {
+        login, register,
+        loginWithFacebook, loginWithGoogle,
+        initializeRecaptcha, sendVerificationCode, verifyOTP,
+        registerWorkerWithPassword, loginWorkerWithPassword,
+    } = useAuth();
 
     // Reset states when switching roles or login/signup mode
     const handleRoleSwitch = (newRole) => {
@@ -40,6 +46,9 @@ function LoginContent() {
         setClientError('');
         setWorkerError('');
         setOtpSent(false);
+        setName('');
+        setEmail('');
+        setPassword('');
     };
 
     // --- Client Handlers ---
@@ -48,12 +57,23 @@ function LoginContent() {
         setClientLoading(true);
         setClientError('');
         try {
-            await login(email, password);
+            if (isLogin) {
+                // LOGIN flow
+                await login(email, password);
+            } else {
+                // SIGNUP flow
+                if (!name.trim()) {
+                    setClientError('Full name is required.');
+                    setClientLoading(false);
+                    return;
+                }
+                await register({ name: name.trim(), email, password, role: 'client' });
+            }
             const redirect = searchParams.get('redirect');
             router.push(redirect ? redirect : '/client/dashboard');
         } catch (error) {
-            console.error('Client Login Error', error);
-            setClientError(error.message || 'Invalid email or password.');
+            console.error('Client Auth Error', error);
+            setClientError(error.message || (isLogin ? 'Invalid email or password.' : 'Registration failed. Please try again.'));
         } finally {
             setClientLoading(false);
         }
@@ -64,12 +84,10 @@ function LoginContent() {
         setClientError('');
         try {
             await loginWithFacebook(role);
-            const redirect = searchParams.get('redirect');
-            router.push(redirect ? redirect : '/client/dashboard');
+            // loginWithFacebook now redirects the browser to OAuth; no router.push needed here
         } catch (error) {
-            console.error("FB Login Error", error);
+            console.error('FB Login Error', error);
             setClientError('Failed to authenticate with Facebook.');
-        } finally {
             setClientLoading(false);
         }
     };
@@ -79,12 +97,10 @@ function LoginContent() {
         setClientError('');
         try {
             await loginWithGoogle(role);
-            const redirect = searchParams.get('redirect');
-            router.push(redirect ? redirect : '/client/dashboard');
+            // loginWithGoogle now redirects the browser to OAuth; no router.push needed here
         } catch (error) {
-            console.error("Google Login Error", error);
+            console.error('Google Login Error', error);
             setClientError('Failed to authenticate with Google.');
-        } finally {
             setClientLoading(false);
         }
     };
@@ -101,7 +117,7 @@ function LoginContent() {
             await sendVerificationCode(formattedPhone, role);
             setOtpSent(true);
         } catch (error) {
-            console.error("OTP Send Error", error);
+            console.error('OTP Send Error', error);
             setWorkerError('Failed to send OTP. Ensure number is in correct format (e.g., +923...).');
         } finally {
             setWorkerLoading(false);
@@ -117,7 +133,7 @@ function LoginContent() {
             const redirect = searchParams.get('redirect');
             router.push(redirect ? redirect : '/worker/dashboard');
         } catch (error) {
-            console.error("OTP Verify Error", error);
+            console.error('OTP Verify Error', error);
             setWorkerError('Invalid OTP code.');
         } finally {
             setWorkerLoading(false);
@@ -160,7 +176,14 @@ function LoginContent() {
                         {!isLogin && (
                             <div className={styles.inputGroup}>
                                 <label htmlFor="name">Full Name</label>
-                                <input type="text" id="name" placeholder="John Doe" required />
+                                <input
+                                    type="text"
+                                    id="name"
+                                    placeholder="John Doe"
+                                    required
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                />
                             </div>
                         )}
                         <div className={styles.inputGroup}>
@@ -187,7 +210,9 @@ function LoginContent() {
                         </div>
 
                         <Button type="submit" size="large" className={styles.submitBtn} disabled={clientLoading}>
-                            {clientLoading ? (isLogin ? 'Logging in...' : 'Signing up...') : (isLogin ? 'Login' : 'Sign Up')}
+                            {clientLoading
+                                ? (isLogin ? 'Logging in...' : 'Signing up...')
+                                : (isLogin ? 'Login' : 'Sign Up')}
                         </Button>
 
                         <div className={styles.divider}>
@@ -245,7 +270,7 @@ function LoginContent() {
                                 const redirect = searchParams.get('redirect');
                                 router.push(redirect ? redirect : '/worker/dashboard');
                             } catch (error) {
-                                console.error("Worker Login Error", error);
+                                console.error('Worker Login Error', error);
                                 setWorkerError('Invalid phone number or password.');
                             } finally {
                                 setWorkerLoading(false);
@@ -356,7 +381,7 @@ function LoginContent() {
                                     const redirect = searchParams.get('redirect');
                                     router.push(redirect ? redirect : '/worker/dashboard');
                                 } catch (error) {
-                                    console.error("Worker Registration OTP/Password Error", error);
+                                    console.error('Worker Registration OTP/Password Error', error);
                                     if (error.code === 'auth/email-already-in-use') {
                                         setWorkerError('This phone number is already registered. Please login instead.');
                                     } else {
@@ -397,7 +422,7 @@ function LoginContent() {
                 )}
 
                 <p className={styles.switchMode}>
-                    {isLogin ? "Don't have an account? " : "Already have an account? "}
+                    {isLogin ? "Don't have an account? " : 'Already have an account? '}
                     <button className={styles.switchLink} onClick={handleModeSwitch}>
                         {isLogin ? 'Sign up' : 'Login'}
                     </button>
@@ -410,7 +435,7 @@ function LoginContent() {
 // Next.js requires using Suspense for client components accessing useSearchParams
 export default function LoginPage() {
     return (
-        <Suspense fallback={<div style={{ textAlign: "center", padding: "100px" }}>Loading...</div>}>
+        <Suspense fallback={<div style={{ textAlign: 'center', padding: '100px' }}>Loading...</div>}>
             <LoginContent />
         </Suspense>
     );
