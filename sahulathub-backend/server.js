@@ -4,6 +4,8 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
+const session = require('express-session');
+const passport = require('./config/passport');   // loads + configures strategies
 const connectDB = require('./config/db');
 
 // ─── Connect to MongoDB ────────────────────────────────────────────────────────
@@ -13,7 +15,7 @@ const app = express();
 
 // ─── CORS — must be before routes and before helmet ───────────────────────────
 const corsOptions = {
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: [process.env.FRONTEND_URL || 'http://localhost:3000', 'http://localhost:3001'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'x-dev-role', 'x-dev-user-id'],
@@ -25,6 +27,22 @@ app.options('*', cors(corsOptions));
 app.use(express.json({ limit: '10kb' }));       // Limit body size
 app.use(express.urlencoded({ extended: true }));
 app.use(helmet());
+
+// ─── Session (needed by Passport OAuth handshake only) ────────────────────────
+// Sessions are very short-lived — JWT takes over after the OAuth redirect.
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'sahulathub_session_secret_dev',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 5 * 60 * 1000,   // 5 minutes — just long enough for OAuth round-trip
+    },
+}));
+
+// ─── Passport Initialization ──────────────────────────────────────────────────
+app.use(passport.initialize());
+app.use(passport.session());
 
 if (process.env.NODE_ENV !== 'test') {
     app.use(morgan('dev'));
@@ -66,6 +84,7 @@ if (process.env.DEV_MODE === 'true') {
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
 app.use('/api/auth', authLimiter, require('./routes/authRoutes'));
+app.use('/api/auth', require('./routes/oauthRoutes'));   // Google & Facebook OAuth
 app.use('/api/tasks', require('./routes/taskRoutes'));
 app.use('/api/workers', require('./routes/workerRoutes'));
 app.use('/api/match', matchLimiter, require('./routes/matchRoutes'));

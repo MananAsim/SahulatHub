@@ -6,6 +6,8 @@ import { apiFetch } from '@/lib/api';
 
 const AuthContext = createContext();
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+
 // ─── Helper: get stored JWT ────────────────────────────────────────────────────
 export const getAuthToken = () =>
     typeof window !== 'undefined' ? localStorage.getItem('sahulat_token') : null;
@@ -113,17 +115,17 @@ export function AuthProvider({ children }) {
         return data.data;
     };
 
-    // ─── Social Logins (Mock — pending real Firebase plan) ────────────────────
-    const loginWithFacebook = async (selectedRole = 'client') => {
-        const dummyUser = { id: 'fb123', name: 'Facebook User', email: 'fb@example.com', role: selectedRole };
-        _setMockSession(dummyUser, selectedRole);
-        return dummyUser;
+    // ─── Social Logins — redirect to Passport.js OAuth backend routes ─────────
+    // The backend handles OAuth flow and redirects back to /auth/callback?token=JWT&role=ROLE
+    const loginWithGoogle = async (selectedRole = 'client') => {
+        // Store the intended role so /auth/callback can restore it if backend doesn't send it
+        localStorage.setItem('sahulat_oauth_role', selectedRole);
+        window.location.href = `${API_BASE_URL}/api/auth/google?role=${selectedRole}`;
     };
 
-    const loginWithGoogle = async (selectedRole = 'client') => {
-        const dummyUser = { id: 'gl123', name: 'Google User', email: 'google@example.com', role: selectedRole };
-        _setMockSession(dummyUser, selectedRole);
-        return dummyUser;
+    const loginWithFacebook = async (selectedRole = 'client') => {
+        localStorage.setItem('sahulat_oauth_role', selectedRole);
+        window.location.href = `${API_BASE_URL}/api/auth/facebook?role=${selectedRole}`;
     };
 
     // ─── OTP stubs (mock — requires paid Firebase SMS plan) ──────────────────
@@ -162,6 +164,7 @@ export function AuthProvider({ children }) {
         localStorage.removeItem('sahulat_role');
         localStorage.removeItem('sahulat_token');
         localStorage.removeItem('sahulat_user_temp');
+        localStorage.removeItem('sahulat_oauth_role');
     };
 
     return (
