@@ -39,19 +39,26 @@ async function handleOAuthCallback(provider, profile, role, done) {
         const name = profile.displayName || profile.name?.givenName || 'User';
         const photo = profile.photos?.[0]?.value;
 
-        // Find existing user by email, or create a new one
-        let user = email ? await User.findOne({ email }) : null;
+        // Try finding by provider ID first
+        let user = null;
+        if (provider === 'google') {
+            user = await User.findOne({ googleId: profile.id });
+        } else if (provider === 'facebook') {
+            user = await User.findOne({ facebookId: profile.id });
+        }
+
+        // If not found by provider ID, try by email to link accounts
+        if (!user && email) {
+            user = await User.findOne({ email });
+        }
 
         if (!user) {
             // New user — register them
-            // OAuth users get a random secure password (they never need it — they log in via OAuth)
-            const crypto = require('crypto');
-            const randomPassword = crypto.randomBytes(32).toString('hex');
-
             user = new User({
                 name,
-                email,
-                password: randomPassword,     // will be hashed by pre-save hook
+                email: email || undefined,
+                authProvider: provider,
+                [`${provider}Id`]: profile.id,
                 role: ['client', 'worker'].includes(role) ? role : 'client',
                 profilePhoto: photo || undefined,
                 location: { lat: 0, lng: 0 },
@@ -60,9 +67,21 @@ async function handleOAuthCallback(provider, profile, role, done) {
             });
 
             await user.save();
-            console.log(`🆕 [OAuth:${provider}] New user created: ${email}`);
+            console.log(`🆕 [OAuth:${provider}] New user created: ${email || profile.id}`);
         } else {
-            console.log(`✅ [OAuth:${provider}] Existing user found: ${email}`);
+            console.log(`✅ [OAuth:${provider}] Existing user found: ${email || profile.id}`);
+            // Link account if not already linked
+            let updated = false;
+            if (provider === 'google' && !user.googleId) {
+                user.googleId = profile.id;
+                updated = true;
+            } else if (provider === 'facebook' && !user.facebookId) {
+                user.facebookId = profile.id;
+                updated = true;
+            }
+            if (updated) {
+                await user.save();
+            }
         }
 
         // Generate a JWT for the frontend
