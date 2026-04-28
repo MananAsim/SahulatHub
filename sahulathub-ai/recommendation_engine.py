@@ -163,13 +163,26 @@ def recommend(
             "final_score",
             "distance_km",
             "working_rating_given_to_customer_avg",
+            # ── Explainability sub-scores (SOTA AI Transparency) ──────────────
+            "semantic_score",
+            "bm25_score",
+            "hybrid_score",
+            "distance_score",
+            "rating_score",
+            "availability_score",
         ]]
         .rename(columns={"working_rating_given_to_customer_avg": "rating"})
     )
 
     # Round floats for clean JSON
-    top["final_score"] = top["final_score"].round(6)
+    top["final_score"] = top["final_score"].round(4)
     top["distance_km"] = top["distance_km"].round(3)
     top["rating"] = top["rating"].round(2)
+    top["semantic_score"] = top["semantic_score"].round(4)
+    top["bm25_score"] = top["bm25_score"].round(4)
+    top["hybrid_score"] = top["hybrid_score"].round(4)
+    top["distance_score"] = top["distance_score"].round(4)
+    top["rating_score"] = top["rating_score"].round(4)
+    top["availability_score"] = top["availability_score"].round(4)
 
     return top.to_dict(orient="records")

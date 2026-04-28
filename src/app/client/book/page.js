@@ -10,8 +10,9 @@ import styles from './page.module.css';
 import {
     FaMapMarkerAlt, FaStar, FaBolt, FaSpinner, FaRobot,
     FaExclamationTriangle, FaSliders, FaSearch, FaDatabase,
-    FaBriefcase, FaPhoneAlt, FaClock,
+    FaBriefcase, FaPhoneAlt, FaClock, FaBrain,
 } from 'react-icons/fa';
+import AIBreakdownModal from '@/components/AIBreakdownModal';
 
 const getCurrentLocation = () =>
     new Promise((resolve) => {
@@ -47,6 +48,7 @@ function BookingContent() {
     const [matchError, setMatchError] = useState('');
     const [aiPowered, setAiPowered] = useState(false);
     const [resultSource, setResultSource] = useState('');
+    const [breakdownWorker, setBreakdownWorker] = useState(null);  // AI Explainability
 
     if (loading || !user) return <div className="section text-center">Loading...</div>;
 
@@ -352,6 +354,26 @@ function BookingContent() {
                                             <span className={styles.score}>
                                                 Match: {(w.final_score * 100).toFixed(0)}%
                                             </span>
+                                            {/* AI Explainability trigger */}
+                                            {w.breakdown && (
+                                                <button
+                                                    onClick={() => setBreakdownWorker(w)}
+                                                    title="View AI scoring breakdown"
+                                                    style={{
+                                                        display: 'flex', alignItems: 'center', gap: 5,
+                                                        background: '#ede9fe', border: 'none',
+                                                        borderRadius: 20, padding: '4px 12px',
+                                                        fontSize: 11, fontWeight: 700,
+                                                        color: '#7c3aed', cursor: 'pointer',
+                                                        transition: 'background 0.15s',
+                                                        whiteSpace: 'nowrap',
+                                                    }}
+                                                    onMouseEnter={e => e.currentTarget.style.background = '#ddd6fe'}
+                                                    onMouseLeave={e => e.currentTarget.style.background = '#ede9fe'}
+                                                >
+                                                    <FaBrain size={10} /> View AI Breakdown
+                                                </button>
+                                            )}
                                             <Button
                                                 onClick={() => handleSelectWorker(w)}
                                                 disabled={assignLoading === w.provider_id}
@@ -381,6 +403,14 @@ function BookingContent() {
                     </div>
                 )}
             </div>
+
+            {/* AI Explainability Modal — renders as fixed overlay, safe outside layout tree */}
+            {breakdownWorker && (
+                <AIBreakdownModal
+                    worker={breakdownWorker}
+                    onClose={() => setBreakdownWorker(null)}
+                />
+            )}
         </div>
     );
 }

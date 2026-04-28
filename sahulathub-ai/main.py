@@ -15,6 +15,7 @@ Node backend calls:
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
+from typing import Optional
 import uvicorn
 
 # ─── Import engine ────────────────────────────────────────────────────────────
@@ -39,6 +40,13 @@ class MatchedWorker(BaseModel):
     final_score: float
     distance_km: float
     rating: float
+    # ── AI Explainability sub-scores (optional — present when AI engine runs) ──
+    semantic_score: Optional[float] = None
+    bm25_score: Optional[float] = None
+    hybrid_score: Optional[float] = None
+    distance_score: Optional[float] = None
+    rating_score: Optional[float] = None
+    availability_score: Optional[float] = None
 
 
 class MatchResponse(BaseModel):
