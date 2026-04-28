@@ -136,6 +136,16 @@ const _csvMatch = ({ query, location, radius, urgency, top_n }) => {
             ai_scored: true,
             source: 'demo_csv',
             _isDemo: true,   // flag: no real DB record, just show in UI
+            // ── AI Explainability Breakdown ──────────────────────────────────
+            breakdown: {
+                proximity:   parseFloat(proximityScore.toFixed(4)),
+                rating:      parseFloat(ratingScore.toFixed(4)),
+                trust:       parseFloat(trustScore.toFixed(4)),
+                experience:  parseFloat(experienceScore.toFixed(4)),
+                exp_years:   parseFloat(expYrScore.toFixed(4)),
+                weights:     { proximity: 0.25, rating: 0.30, trust: 0.20, experience: 0.15, exp_years: 0.10 },
+                source:      'rule_csv',
+            },
         });
     }
 
@@ -188,6 +198,15 @@ const _ruleBased = async ({ query, location, radius, urgency }) => {
                 final_score: finalScore,
                 ai_scored: false,
                 source: 'db',
+                // ── AI Explainability Breakdown ──────────────────────────────────
+                breakdown: {
+                    proximity:  parseFloat(proximity.toFixed(4)),
+                    skill:      parseFloat(skillScore.toFixed(4)),
+                    urgency:    parseFloat(urgencyFactor.toFixed(4)),
+                    rating:     parseFloat(ratingScore.toFixed(4)),
+                    weights:    { proximity: 0.40, skill: 0.35, urgency: 0.10, rating: 0.15 },
+                    source:     'rule_db',
+                },
             };
         })
         .filter(Boolean)
@@ -211,6 +230,18 @@ const _aiMatch = async ({ query, location, radius, urgency, top_n }) => {
 
         const dbWorkers = await User.find({ role: 'worker', availability: true }).lean();
         return aiResults.map(aiW => {
+            // Build the explainability breakdown from Python engine sub-scores
+            const breakdown = {
+                semantic:     aiW.semantic_score     ?? null,
+                bm25:         aiW.bm25_score         ?? null,
+                hybrid:       aiW.hybrid_score       ?? null,
+                proximity:    aiW.distance_score     ?? null,
+                rating:       aiW.rating_score       ?? null,
+                availability: aiW.availability_score ?? null,
+                weights:      { hybrid: 0.50, rating: 0.20, proximity: 0.20, availability: 0.10 },
+                source:       'ai_python',
+            };
+
             const match = dbWorkers.find(w =>
                 (w.skills || []).some(s => s.toLowerCase().includes((aiW.primary_skill || '').toLowerCase().split(' ')[0]))
             );
@@ -225,6 +256,7 @@ const _aiMatch = async ({ query, location, radius, urgency, top_n }) => {
                     final_score: aiW.final_score,
                     ai_scored: true,
                     source: 'ai_service',
+                    breakdown,
                 };
             }
             return {
@@ -238,6 +270,7 @@ const _aiMatch = async ({ query, location, radius, urgency, top_n }) => {
                 ai_scored: true,
                 source: 'ai_service',
                 _isDemo: true,
+                breakdown,
             };
         });
     } finally {
