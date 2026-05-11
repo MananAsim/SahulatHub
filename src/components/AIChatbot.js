@@ -205,7 +205,7 @@ export default function AIChatbot({ role: propRole }) {
             setSource(data.source);
             speak(reply);
         } catch {
-            setMessages(prev => [...prev, { id: Date.now() + 1, role: 'assistant', content: "Connection issue. Make sure Ollama is running: `ollama serve`", ts: Date.now() }]);
+            setMessages(prev => [...prev, { id: Date.now() + 1, role: 'assistant', content: "Connection issue. Please try again.", ts: Date.now() }]);
         } finally { setLoading(false); }
     }, [input, loading, messages, role, sessionId, speak]);
 
@@ -258,7 +258,7 @@ export default function AIChatbot({ role: propRole }) {
                             <div className={styles.hInfo}>
                                 <div className={styles.hName}>Sahal <span className={styles.hBadge}>AI</span></div>
                                 <div className={styles.hSub}>
-                                    {source === 'n8n' ? '⚡ n8n' : source === 'ollama' ? '🦙 Ollama' : '🟢 Online'} · SahulatHub Support
+                                    {source === 'groq' ? '⚡ Llama 3.3' : '🟢 Online'} · SahulatHub Support
                                 </div>
                             </div>
                         </div>
@@ -428,7 +428,7 @@ export default function AIChatbot({ role: propRole }) {
                 {/* Footer */}
                 <div className={styles.footer}>
                     <span className={styles.footerDot} />
-                    <span>Powered by <strong>🦙 Ollama</strong> · <strong>⚡ n8n</strong> · SahulatHub AI</span>
+                    <span>Powered by <strong>⚡ Groq (Llama 3.3)</strong> · SahulatHub AI</span>
                 </div>
             </div>
 

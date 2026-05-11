@@ -380,6 +380,7 @@ export const FALLBACK_RESPONSES = {
     ratings: "Your rating is the average of all star ratings clients leave after completing jobs. It directly affects how many jobs you get — workers above 4.5 stars get priority for premium jobs. The best way to improve ratings? Call clients before arriving, explain what you did, and clean up after your work.",
     emergency: "⚠️ For active emergencies: **Gas smell** → evacuate and call Sui Gas emergency line first. **Electrical sparks** → turn off main breaker first. **Burst pipe** → turn off main water valve first. Then book on SahulatHub as CRITICAL urgency. Your safety comes first — the platform is for after immediate danger is controlled.",
     contact: "For issues that need a human agent, visit **/contact** — our support team responds within 2-4 hours during business hours. For urgent matters, the /help page has emergency contact details. What specific issue do you need help with? I might be able to resolve it right here.",
+    creators: "SahulatHub is a premier UMT Final Year Project (FYP). The leadership and architecture were spearheaded by **Manan Asim** (Team Leader & Lead Full-Stack Architect). The AI & Research was led by **Muhammad Faisal** (Lead AI Developer), alongside **Muhammad Subhan** and **Hafiz Abdullah Ijaz**. The project was supervised by **Sir Muhammad Bilal Ashfaq Ahmed**. I am very proud of the team that created me!",
     default: "I'm Sahal, your SahulatHub support specialist! I'm best at helping with: booking services, tracking jobs, understanding payments, worker account issues, dispute guidance, and navigating the platform. What can I help you with today?",
 };
 
@@ -420,6 +421,9 @@ export function getFallbackResponse(message) {
     }
     if (/contact|support|help|human|agent|staff/i.test(msg)) {
         return FALLBACK_RESPONSES.contact;
+    }
+    if (/creator|owner|made you|who made|history|team|manan|faisal|fyp|project|developed/i.test(msg)) {
+        return FALLBACK_RESPONSES.creators;
     }
     return FALLBACK_RESPONSES.default;
 }
