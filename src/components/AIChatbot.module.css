@@ -80,18 +80,17 @@
 
 /* Idle pulse (before first open) */
 .fabIdle {
-    animation: fabPulseAnim 3s ease-in-out infinite;
+    animation: floatOrb 4s ease-in-out infinite;
 }
 
-@keyframes fabPulseAnim {
-
-    0%,
-    100% {
+@keyframes floatOrb {
+    0%, 100% {
+        transform: translateY(0) scale(1);
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 0 0 rgba(124, 58, 237, 0.5);
     }
-
     50% {
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 0 12px rgba(124, 58, 237, 0);
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 0 0 0 12px rgba(124, 58, 237, 0);
     }
 }
 

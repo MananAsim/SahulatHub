@@ -2,6 +2,7 @@
 
 import { useState, use } from 'react';
 import { useRouter } from 'next/navigation';
+import { apiFetch } from '@/lib/api';
 import Card from '@/components/Card';
 import Button from '@/components/Button';
 import styles from './page.module.css';
@@ -14,15 +15,18 @@ export default function PaymentPage({ params }) {
     const [isProcessing, setIsProcessing] = useState(false);
     const [success, setSuccess] = useState(false);
 
-    const handlePayment = (e) => {
+    const handlePayment = async (e) => {
         e.preventDefault();
         setIsProcessing(true);
 
-        // Simulate payment processing
-        setTimeout(() => {
-            setIsProcessing(false);
+        try {
+            await apiFetch(`/api/tasks/${id}/pay`, { method: 'POST' });
             setSuccess(true);
-        }, 2000);
+        } catch (err) {
+            alert('Payment failed: ' + err.message);
+        } finally {
+            setIsProcessing(false);
+        }
     };
 
     if (success) {
@@ -32,8 +36,8 @@ export default function PaymentPage({ params }) {
                     <div className={styles.successIcon}>✓</div>
                     <h2>Payment Successful!</h2>
                     <p>Your payment of Rs 1500 has been processed.</p>
-                    <Button onClick={() => router.push('/client/dashboard')} className="mt-4">
-                        Return to Dashboard
+                    <Button onClick={() => router.push(`/client/job/${id}`)} className="mt-4">
+                        Return to Job Details
                     </Button>
                 </Card>
             </div>

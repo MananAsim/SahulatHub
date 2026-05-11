@@ -243,5 +243,88 @@ const assignDemoTask = async (req, res) => {
     }
 };
 
-module.exports = { createTask, getAvailableTasks, getWorkerTasks, updateTaskStatus, getUserTasks, getTaskById, assignTask, assignDemoTask };
+// @desc    Mark a task as paid
+// @route   POST /api/tasks/:id/pay
+// @access  Private (client only)
+const payTask = async (req, res) => {
+    try {
+        const task = await Task.findById(req.params.id);
+        if (!task) return res.status(404).json({ success: false, message: 'Task not found' });
+
+        if (task.client_id.toString() !== req.user.id.toString()) {
+            return res.status(403).json({ success: false, message: 'Not authorized to pay for this task' });
+        }
+
+        task.payment_status = 'paid';
+        await task.save();
+
+        res.status(200).json({
+            success: true,
+            message: 'Payment successful',
+            data: task,
+        });
+    } catch (error) {
+        console.error('Pay Task Error:', error.message);
+        res.status(500).json({ success: false, message: 'Server error', error: error.message });
+    }
+};
+
+// @desc    Get chat messages for a task
+// @route   GET /api/tasks/:id/chat
+// @access  Private
+const getTaskChat = async (req, res) => {
+    try {
+        const task = await Task.findById(req.params.id);
+        if (!task) return res.status(404).json({ success: false, message: 'Task not found' });
+        
+        if (task.client_id.toString() !== req.user.id.toString() && 
+            task.assigned_worker_id?.toString() !== req.user.id.toString()) {
+            return res.status(403).json({ success: false, message: 'Not authorized' });
+        }
+
+        res.status(200).json({ success: true, data: task.chat || [] });
+    } catch (error) {
+        console.error('Get Task Chat Error:', error.message);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
+
+// @desc    Post a chat message to a task
+// @route   POST /api/tasks/:id/chat
+// @access  Private
+const postTaskChat = async (req, res) => {
+    try {
+        const { text, sender } = req.body;
+        if (!text || !sender) return res.status(400).json({ success: false, message: 'text and sender required' });
+
+        const task = await Task.findById(req.params.id);
+        if (!task) return res.status(404).json({ success: false, message: 'Task not found' });
+
+        if (task.client_id.toString() !== req.user.id.toString() && 
+            task.assigned_worker_id?.toString() !== req.user.id.toString()) {
+            return res.status(403).json({ success: false, message: 'Not authorized' });
+        }
+
+        task.chat.push({ sender, text });
+        
+        if (task.demo_worker && sender === 'client') {
+            const replies = [
+                "I'm on my way, will be there shortly.",
+                "Noted. I'll make sure to bring the right tools.",
+                "Can you confirm if there's parking nearby?",
+                "Got it. See you soon."
+            ];
+            const aiReply = replies[Math.floor(Math.random() * replies.length)];
+            task.chat.push({ sender: 'ai', text: aiReply });
+        }
+
+        await task.save();
+        res.status(201).json({ success: true, data: task.chat });
+    } catch (error) {
+        console.error('Post Task Chat Error:', error.message);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
+
+module.exports = { createTask, getAvailableTasks, getWorkerTasks, updateTaskStatus, getUserTasks, getTaskById, assignTask, assignDemoTask, payTask, getTaskChat, postTaskChat };
 

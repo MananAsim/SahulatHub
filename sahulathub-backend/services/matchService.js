@@ -243,7 +243,7 @@ const _aiMatch = async ({ query, location, radius, urgency, top_n }) => {
             };
 
             const match = dbWorkers.find(w =>
-                (w.skills || []).some(s => s.toLowerCase().includes((aiW.primary_skill || '').toLowerCase().split(' ')[0]))
+                (w.skills || []).some(skill => _skillMatches(skill, aiW.primary_skill))
             );
             if (match) {
                 return {

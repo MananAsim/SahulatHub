@@ -3,57 +3,69 @@
 import { useState, useRef, useEffect, use } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
+import { apiFetch } from '@/lib/api';
 import styles from './page.module.css';
 import { FaPaperPlane, FaArrowLeft, FaEllipsisV, FaImage } from 'react-icons/fa';
 
 export default function ClientChatPage({ params }) {
     const { id } = use(params);
-    const { user, loading, role } = useAuth();
+    const { user, loading } = useAuth();
     const router = useRouter();
-    const [messages, setMessages] = useState([
-        { id: 1, text: "Hi, I'm on my way to your location.", sender: 'worker', time: '10:05 AM' },
-        { id: 2, text: "Great, please let me know when you arrive.", sender: 'client', time: '10:07 AM' }
-    ]);
+    
+    const [messages, setMessages] = useState([]);
     const [inputValue, setInputValue] = useState('');
-    const [isTyping, setIsTyping] = useState(false);
     const messagesEndRef = useRef(null);
 
-    // Auto-scroll to bottom of chat
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
 
+    const fetchChat = async () => {
+        try {
+            const res = await apiFetch(`/api/tasks/${id}/chat`);
+            if (res.success) {
+                setMessages(prev => {
+                    // Only update if lengths differ to prevent re-renders
+                    if (prev.length !== res.data.length) return res.data;
+                    return prev;
+                });
+            }
+        } catch (err) {
+            console.error('Fetch chat error', err);
+        }
+    };
+
+    useEffect(() => {
+        fetchChat();
+        const interval = setInterval(fetchChat, 3000);
+        return () => clearInterval(interval);
+    }, [id]);
+
     useEffect(() => {
         scrollToBottom();
-    }, [messages, isTyping]);
+    }, [messages]);
 
     if (loading || !user) return <div className="section text-center">Loading Chat...</div>;
 
-    const handleSend = (e) => {
+    const handleSend = async (e) => {
         e.preventDefault();
         if (!inputValue.trim()) return;
 
-        const newMsg = {
-            id: Date.now(),
-            text: inputValue,
-            sender: 'client',
-            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        };
-
-        setMessages([...messages, newMsg]);
+        const text = inputValue;
         setInputValue('');
 
-        // Simulate worker typing back
-        setIsTyping(true);
-        setTimeout(() => {
-            setIsTyping(false);
-            setMessages(prev => [...prev, {
-                id: Date.now(),
-                text: "I should be there in about 5 minutes.",
-                sender: 'worker',
-                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-            }]);
-        }, 2500);
+        // Optimistic update
+        setMessages(prev => [...prev, { _id: Date.now(), sender: 'client', text, timestamp: new Date() }]);
+
+        try {
+            const res = await apiFetch(`/api/tasks/${id}/chat`, {
+                method: 'POST',
+                body: JSON.stringify({ sender: 'client', text })
+            });
+            if (res.success) setMessages(res.data);
+        } catch (err) {
+            console.error('Send error', err);
+        }
     };
 
     return (
@@ -65,11 +77,11 @@ export default function ClientChatPage({ params }) {
                             <FaArrowLeft />
                         </button>
                         <div className={styles.avatar}>
-                            <img src="https://ui-avatars.com/api/?name=Ali+Hassan&background=0D8ABC&color=fff" alt="Worker" />
+                            <img src="https://ui-avatars.com/api/?name=Worker&background=0D8ABC&color=fff" alt="Worker" />
                         </div>
                         <div className={styles.userInfo}>
-                            <h2>Ali Hassan</h2>
-                            <p className={styles.status}>Online</p>
+                            <h2>Worker Chat</h2>
+                            <p className={styles.status}>Live P2P</p>
                         </div>
                     </div>
                     <button className={styles.menuBtn}><FaEllipsisV /></button>
@@ -78,25 +90,21 @@ export default function ClientChatPage({ params }) {
                 <div className={styles.messageArea}>
                     <div className={styles.dateDivider}>Today</div>
 
+                    {messages.length === 0 && <div className="text-center text-sm text-gray-500 mt-4">Send a message to start chatting</div>}
+
                     {messages.map((msg) => (
                         <div
-                            key={msg.id}
+                            key={msg._id}
                             className={`${styles.messageWrapper} ${msg.sender === 'client' ? styles.myMessage : styles.theirMessage}`}
                         >
                             <div className={styles.messageBubble}>
                                 <p>{msg.text}</p>
-                                <span className={styles.time}>{msg.time}</span>
+                                <span className={styles.time}>
+                                    {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </span>
                             </div>
                         </div>
                     ))}
-
-                    {isTyping && (
-                        <div className={`${styles.messageWrapper} ${styles.theirMessage}`}>
-                            <div className={`${styles.messageBubble} ${styles.typingIndicator}`}>
-                                <span></span><span></span><span></span>
-                            </div>
-                        </div>
-                    )}
                     <div ref={messagesEndRef} />
                 </div>
 

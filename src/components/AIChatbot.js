@@ -5,42 +5,55 @@ import { useAuth } from '@/context/AuthContext';
 import { CALL_GUIDANCE_SCRIPTS } from '@/lib/chatKnowledge';
 import styles from './AIChatbot.module.css';
 
-// ─── Animated Sahal Brand Icon ────────────────────────────────────────────────
+// ─── Animated SOTA 3D Sahal Brand Icon ──────────────────────────────────────
 const SahalIcon = ({ size = 24, animated = false }) => (
-    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className={animated ? styles.iconSpin : ''}>
+    <svg width={size} height={size} viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className={animated ? styles.iconSpin : ''}>
         <defs>
-            <linearGradient id="sahal-g1" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#a78bfa" />
-                <stop offset="50%" stopColor="#60a5fa" />
-                <stop offset="100%" stopColor="#34d399" />
+            <linearGradient id="orb-gradient" x1="10%" y1="0%" x2="90%" y2="100%">
+                <stop offset="0%" stopColor="#c084fc" />
+                <stop offset="40%" stopColor="#818cf8" />
+                <stop offset="100%" stopColor="#3b82f6" />
             </linearGradient>
-            <linearGradient id="sahal-g2" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#f472b6" />
-                <stop offset="100%" stopColor="#818cf8" />
+            <linearGradient id="orb-highlight" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="rgba(255,255,255,0.9)" />
+                <stop offset="100%" stopColor="rgba(255,255,255,0)" />
             </linearGradient>
+            <radialGradient id="orb-glow" cx="50%" cy="50%" r="50%">
+                <stop offset="60%" stopColor="rgba(167,139,250,0.6)" />
+                <stop offset="100%" stopColor="rgba(167,139,250,0)" />
+            </radialGradient>
+            <filter id="glass-blur" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="3" />
+            </filter>
+            <filter id="drop-shadow" x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="0" dy="6" stdDeviation="6" floodColor="#3b82f6" floodOpacity="0.5"/>
+            </filter>
         </defs>
-        {/* Outer diamond ring */}
-        <path d="M24 3L45 24L24 45L3 24Z" stroke="url(#sahal-g1)" strokeWidth="1.5" fill="none" opacity="0.6" />
-        {/* Inner octagon */}
-        <path d="M24 10L36 18V30L24 38L12 30V18Z" stroke="url(#sahal-g1)" strokeWidth="1.5" fill="rgba(167,139,250,0.08)" />
-        {/* Center neural nodes */}
-        <circle cx="24" cy="16" r="2" fill="url(#sahal-g1)" />
-        <circle cx="32" cy="24" r="2" fill="url(#sahal-g1)" />
-        <circle cx="24" cy="32" r="2" fill="url(#sahal-g1)" />
-        <circle cx="16" cy="24" r="2" fill="url(#sahal-g1)" />
-        {/* Center sparkle */}
-        <circle cx="24" cy="24" r="4" fill="url(#sahal-g1)" />
-        <circle cx="24" cy="24" r="2" fill="white" opacity="0.9" />
-        {/* Connecting lines */}
-        <line x1="24" y1="18" x2="24" y2="20" stroke="url(#sahal-g1)" strokeWidth="1" opacity="0.8" />
-        <line x1="30" y1="24" x2="28" y2="24" stroke="url(#sahal-g1)" strokeWidth="1" opacity="0.8" />
-        <line x1="24" y1="30" x2="24" y2="28" stroke="url(#sahal-g1)" strokeWidth="1" opacity="0.8" />
-        <line x1="18" y1="24" x2="20" y2="24" stroke="url(#sahal-g1)" strokeWidth="1" opacity="0.8" />
-        {/* Spark dots */}
-        <circle cx="38" cy="12" r="1.5" fill="#a78bfa" opacity="0.7" />
-        <circle cx="10" cy="36" r="1.5" fill="#60a5fa" opacity="0.7" />
-        <circle cx="10" cy="12" r="1.5" fill="#34d399" opacity="0.7" />
-        <circle cx="38" cy="36" r="1.5" fill="#f472b6" opacity="0.7" />
+        
+        {/* Glow behind */}
+        <circle cx="32" cy="32" r="30" fill="url(#orb-glow)" />
+        
+        {/* Main 3D Sphere */}
+        <circle cx="32" cy="32" r="24" fill="url(#orb-gradient)" filter="url(#drop-shadow)" />
+        
+        {/* Inner Glass/Highlight layer for 3D effect */}
+        <ellipse cx="32" cy="18" rx="16" ry="8" fill="url(#orb-highlight)" opacity="0.7" filter="url(#glass-blur)" />
+        <path d="M 12 32 A 20 20 0 0 0 52 32 A 22 22 0 0 1 12 32 Z" fill="rgba(255,255,255,0.2)" />
+
+        {/* Neural Network / AI core design inside the orb */}
+        <g opacity="0.95">
+            <circle cx="32" cy="32" r="7" fill="#fff" filter="url(#glass-blur)"/>
+            <circle cx="32" cy="32" r="3.5" fill="#fff" />
+            <path d="M32 18 L32 26 M32 38 L32 46 M18 32 L26 32 M38 32 L46 32 M22 22 L27 27 M42 42 L37 37 M42 22 L37 27 M22 42 L27 37" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" opacity="0.8"/>
+            <circle cx="32" cy="18" r="2" fill="#fff" />
+            <circle cx="32" cy="46" r="2" fill="#fff" />
+            <circle cx="18" cy="32" r="2" fill="#fff" />
+            <circle cx="46" cy="32" r="2" fill="#fff" />
+            <circle cx="22" cy="22" r="1.5" fill="#fff" />
+            <circle cx="42" cy="42" r="1.5" fill="#fff" />
+            <circle cx="42" cy="22" r="1.5" fill="#fff" />
+            <circle cx="22" cy="42" r="1.5" fill="#fff" />
+        </g>
     </svg>
 );
 

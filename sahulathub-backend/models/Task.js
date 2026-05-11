@@ -39,6 +39,11 @@ const taskSchema = new mongoose.Schema(
             enum: ['open', 'assigned', 'in_progress', 'completed', 'cancelled'],
             default: 'open',
         },
+        payment_status: {
+            type: String,
+            enum: ['pending', 'paid'],
+            default: 'pending',
+        },
         client_id: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',
@@ -49,6 +54,17 @@ const taskSchema = new mongoose.Schema(
             ref: 'User',
             default: null,
         },
+        demo_worker: {
+            type: Object,
+            default: null, // Stores { worker_id, worker_name, worker_skill } for AI matches
+        },
+        chat: [
+            {
+                sender: { type: String, enum: ['client', 'worker', 'ai'] },
+                text: { type: String, required: true },
+                timestamp: { type: Date, default: Date.now },
+            }
+        ],
     },
     { timestamps: true }
 );

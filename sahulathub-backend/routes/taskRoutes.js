@@ -8,6 +8,9 @@ const {
     getTaskById,
     assignTask,
     assignDemoTask,
+    payTask,
+    getTaskChat,
+    postTaskChat,
 } = require('../controllers/taskController');
 const { protect } = require('../middleware/authMiddleware');
 const { authorizeRoles } = require('../middleware/roleMiddleware');
@@ -37,5 +40,14 @@ router.post('/:id/assign', protect, authorizeRoles('client'), assignTask);
 
 // @route   POST /api/tasks/:id/assign-demo — client picks a CSV demo worker
 router.post('/:id/assign-demo', protect, authorizeRoles('client'), assignDemoTask);
+
+// @route   POST /api/tasks/:id/pay — client pays for a task
+router.post('/:id/pay', protect, authorizeRoles('client'), payTask);
+
+// @route   GET /api/tasks/:id/chat — get chat messages
+router.get('/:id/chat', protect, getTaskChat);
+
+// @route   POST /api/tasks/:id/chat — post a chat message
+router.post('/:id/chat', protect, postTaskChat);
 
 module.exports = router;

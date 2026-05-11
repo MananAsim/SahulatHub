@@ -20,6 +20,7 @@ export default function WorkerDashboard() {
     // ── Real data state ───────────────────────────────────────────────────────
     const [stats, setStats] = useState(null);
     const [assignedTasks, setAssignedTasks] = useState([]);
+    const [reviews, setReviews] = useState([]);
     const [dataLoading, setDataLoading] = useState(true);
     const [dataError, setDataError] = useState(null);
 
@@ -36,13 +37,15 @@ export default function WorkerDashboard() {
         setDataLoading(true);
         setDataError(null);
         try {
-            const [statsData, tasksData] = await Promise.all([
+            const [statsData, tasksData, reviewsData] = await Promise.all([
                 apiFetch('/api/workers/me/stats'),
                 apiFetch('/api/tasks/worker'),
+                apiFetch('/api/reviews/received').catch(() => ({ data: [] }))
             ]);
 
             setStats(statsData.data);
             setAssignedTasks(tasksData.data || []);
+            setReviews(reviewsData.data || []);
         } catch (err) {
             console.error('Dashboard fetch error:', err.message);
             setDataError(err.message);
@@ -252,6 +255,36 @@ export default function WorkerDashboard() {
                                         </div>
                                     </Card>
                                 ))}
+                        </div>
+                    </section>
+                )}
+
+                {/* ── Client Reviews ─────────────────────────────────────────────── */}
+                {!dataLoading && reviews.length > 0 && (
+                    <section className={styles.requestsSection}>
+                        <h2>Client Reviews ({reviews.length})</h2>
+                        <div className={styles.requestsList}>
+                            {reviews.slice(0, 5).map((rev) => (
+                                <Card key={rev._id} className={styles.requestCard}>
+                                    <div className={styles.reqTop}>
+                                        <div>
+                                            <h3 className={styles.reqTitle}>{rev.client_id?.name || 'Client'}</h3>
+                                            <p className={styles.reqLocation} style={{ fontSize: 13, color: '#64748b', marginTop: 4 }}>
+                                                "{rev.comment}"
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <span style={{
+                                                fontSize: 14, fontWeight: 700, padding: '4px 10px',
+                                                borderRadius: 20, background: '#fef3c7', color: '#b45309',
+                                                display: 'flex', alignItems: 'center', gap: '4px'
+                                            }}>
+                                                {rev.rating} <FaStar />
+                                            </span>
+                                        </div>
+                                    </div>
+                                </Card>
+                            ))}
                         </div>
                     </section>
                 )}

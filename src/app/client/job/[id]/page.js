@@ -197,12 +197,18 @@ export default function JobDetailsPage({ params }) {
                         </div>
                         <p className={styles.paymentNote}>Final price agreed with the worker on site.</p>
 
-                        <Button
-                            style={{ width: '100%', marginTop: '16px' }}
-                            onClick={() => router.push(`/client/payment/${id}`)}
-                        >
-                            Proceed to Payment
-                        </Button>
+                        {task?.payment_status === 'paid' ? (
+                            <div style={{ marginTop: '16px', padding: '12px', background: '#dcfce7', color: '#16a34a', borderRadius: '8px', textAlign: 'center', fontWeight: 'bold' }}>
+                                ✅ Payment Completed
+                            </div>
+                        ) : (
+                            <Button
+                                style={{ width: '100%', marginTop: '16px' }}
+                                onClick={() => router.push(`/client/payment/${id}`)}
+                            >
+                                Proceed to Payment
+                            </Button>
+                        )}
                     </Card>
                 </div>
             </div>
