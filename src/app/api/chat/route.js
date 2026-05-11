@@ -2,7 +2,7 @@ import { SAHULAT_SYSTEM_PROMPT, getFallbackResponse } from '@/lib/chatKnowledge'
 import { TOOL_SCHEMAS, executeTool } from './tools';
 
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
-const GROQ_TEXT_MODEL = 'llama-3.3-70b-versatile';
+const GROQ_TEXT_MODEL = 'llama-3.1-8b-instant'; // Much higher free tier limits (30k TPM)
 const GROQ_VISION_MODEL = 'meta-llama/llama-4-scout-17b-16e-instruct';
 const GROQ_WHISPER_MODEL = 'whisper-large-v3-turbo';
 const GROQ_BASE = 'https://api.groq.com/openai/v1';
@@ -133,9 +133,16 @@ async function handleAgenticText({ messages, role, token }) {
             groqMessages.push(choice.message);
 
             // Execute each tool call in parallel
+            let frontendAction = null;
+
             const toolResults = await Promise.all(
                 choice.message.tool_calls.map(async (tc) => {
                     const args = JSON.parse(tc.function.arguments || '{}');
+                    
+                    if (tc.function.name === 'navigate_user') {
+                        frontendAction = { type: 'REDIRECT', url: args.url };
+                    }
+
                     const result = await executeTool(tc.function.name, args, token);
                     return {
                         role: 'tool',
@@ -169,10 +176,14 @@ async function handleAgenticText({ messages, role, token }) {
         const reply = choice?.message?.content;
         if (!reply) throw new Error('Empty response from Groq');
 
-        return Response.json({ success: true, message: reply, source: 'groq' });
+        return Response.json({ success: true, message: reply, source: 'groq', action: frontendAction });
 
     } catch (err) {
         console.warn('[AgenticText] Error:', err.message);
+        // If it's a rate limit error, tell the user gracefully
+        if (err.message.includes('429')) {
+             return Response.json({ success: true, message: "I'm thinking a bit too fast! Please wait a few seconds before asking the next question.", source: 'rate_limit' });
+        }
         return Response.json({ success: true, message: getFallbackResponse(''), source: 'fallback' });
     }
 }

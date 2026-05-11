@@ -385,8 +385,9 @@ export const FALLBACK_RESPONSES = {
 };
 
 export function getFallbackResponse(message) {
-    const msg = message.toLowerCase();
-    if (/hi|hello|hey|salam|assalam|hola|aoa|good (morning|afternoon|evening)/i.test(msg)) {
+    const msg = message.toLowerCase().trim();
+    // Only match as a simple greeting if the message is very short (e.g. just "hello")
+    if (/^(hi|hello|hey|salam|assalam|hola|aoa|good (morning|afternoon|evening))[^a-z]*$/i.test(msg) || (msg.length < 15 && /hi|hello|hey|salam/i.test(msg))) {
         return FALLBACK_RESPONSES.greetings[Math.floor(Math.random() * FALLBACK_RESPONSES.greetings.length)];
     }
     if (/not (show|arrive|come|here)|where.*worker|worker.*not|haven.t (come|arrived|shown)/i.test(msg)) {

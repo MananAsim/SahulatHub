@@ -85,6 +85,20 @@ export const TOOL_SCHEMAS = [
             },
         },
     },
+    {
+        type: 'function',
+        function: {
+            name: 'navigate_user',
+            description: 'Navigate or redirect the user to a specific page on SahulatHub (e.g. /contact, /client/dashboard, /auth/login, /help). Use this when the user asks to be taken to a page.',
+            parameters: {
+                type: 'object',
+                properties: {
+                    url: { type: 'string', description: 'The relative URL to redirect to, starting with /' }
+                },
+                required: ['url']
+            }
+        }
+    }
 ];
 
 // ── Tool Executors (server-side DB calls) ──────────────────────────────────────
@@ -188,6 +202,11 @@ export async function executeTool(toolName, toolArgs, authToken) {
             } catch (e) {
                 return { error: e.message };
             }
+        }
+
+        case 'navigate_user': {
+            // The actual redirect happens in the frontend via route.js action
+            return { success: true, message: `Navigating user to ${toolArgs.url}` };
         }
 
         default:

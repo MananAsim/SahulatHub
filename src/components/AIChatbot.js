@@ -211,6 +211,12 @@ export default function AIChatbot({ role: propRole }) {
             setMessages(prev => [...prev, { id: Date.now() + 1, role: 'assistant', content: reply, ts: Date.now(), src: data.source }]);
             setSource(data.source);
             speak(reply);
+
+            // ── Agentic Frontend Action Execution ──
+            if (data.action?.type === 'REDIRECT' && data.action.url) {
+                setTimeout(() => { window.location.href = data.action.url; }, 1500);
+            }
+
         } catch {
             setMessages(prev => [...prev, { id: Date.now() + 1, role: 'assistant', content: 'Connection issue. Please try again.', ts: Date.now() }]);
         } finally { setLoading(false); }
@@ -221,7 +227,7 @@ export default function AIChatbot({ role: propRole }) {
     const fmt = t => t.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br/>');
     const clearChat = () => setMessages([{ id: Date.now(), role: 'assistant', content: "Chat cleared! I'm Sahal — how can I help you today?", ts: Date.now() }]);
 
-    const sourceLabel = source === 'groq' ? '⚡ Llama 3.3' : source === 'groq_vision' ? '👁️ Vision AI' : '🟢 Online';
+    const sourceLabel = source === 'groq' ? '⚡ Llama 3.1 Agent' : source === 'groq_vision' ? '👁️ Vision AI' : source === 'rate_limit' ? '⚠️ Rate Limited' : '🟢 Online';
 
     return (
         <>
