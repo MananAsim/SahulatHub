@@ -228,7 +228,6 @@ const _aiMatch = async ({ query, location, radius, urgency, top_n }) => {
         const data = await response.json();
         const aiResults = data.data || [];
 
-        const dbWorkers = await User.find({ role: 'worker', availability: true }).lean();
         return aiResults.map(aiW => {
             // Build the explainability breakdown from Python engine sub-scores
             const breakdown = {
@@ -242,26 +241,9 @@ const _aiMatch = async ({ query, location, radius, urgency, top_n }) => {
                 source:       'ai_python',
             };
 
-            const match = dbWorkers.find(w =>
-                (w.skills || []).some(skill => _skillMatches(skill, aiW.primary_skill))
-            );
-            if (match) {
-                return {
-                    provider_id: match._id,
-                    name: match.name,
-                    skills: match.skills,
-                    rating: aiW.rating ?? match.rating,
-                    distance_km: aiW.distance_km,
-                    primary_skill: aiW.primary_skill,
-                    final_score: aiW.final_score,
-                    ai_scored: true,
-                    source: 'ai_service',
-                    breakdown,
-                };
-            }
             return {
                 provider_id: aiW.worker_id,
-                name: `Worker #${aiW.worker_id}`,
+                name: aiW.full_name || `Worker #${aiW.worker_id}`,
                 skills: [aiW.primary_skill],
                 rating: aiW.rating,
                 distance_km: aiW.distance_km,
@@ -280,34 +262,52 @@ const _aiMatch = async ({ query, location, radius, urgency, top_n }) => {
 
 // ── Public API ────────────────────────────────────────────────────────────────
 const findMatches = async ({ query, location, radius = 10, urgency = 'medium', top_n = 10 }) => {
-    // 1. Try the Python AI microservice
-    try {
-        console.log(`[Match] Calling AI microservice: "${query}"`);
-        const results = await _aiMatch({ query, location, radius, urgency, top_n });
-        if (results.length > 0) {
-            console.log(`[Match] AI service: ${results.length} results`);
-            return results;
-        }
-    } catch (err) {
-        console.warn(`[Match] AI service unavailable (${err.message})`);
-    }
+    let allResults = [];
 
-    // 2. Try real DB workers
+    // 1. Get real DB workers via Rule-based fallback
     try {
         const dbResults = await _ruleBased({ query, location, radius: Math.max(radius, 50), urgency });
         if (dbResults.length > 0) {
-            console.log(`[Match] DB fallback: ${dbResults.length} results`);
-            return dbResults.slice(0, top_n);
+            console.log(`[Match] DB Workers found: ${dbResults.length}`);
+            allResults.push(...dbResults);
         }
     } catch (err) {
         console.warn(`[Match] DB fallback error (${err.message})`);
     }
 
-    // 3. Demo CSV dataset — always works
-    console.log(`[Match] Using CSV demo dataset for query: "${query}", radius: ${radius}km`);
-    const csvResults = _csvMatch({ query, location, radius, urgency, top_n });
-    console.log(`[Match] CSV demo: ${csvResults.length} results`);
-    return csvResults;
+    // 2. Try the Python AI microservice (Demo dataset)
+    let aiOrCsvResults = [];
+    try {
+        console.log(`[Match] Calling AI microservice: "${query}"`);
+        const aiResults = await _aiMatch({ query, location, radius, urgency, top_n });
+        if (aiResults.length > 0) {
+            console.log(`[Match] AI service found: ${aiResults.length} results`);
+            aiOrCsvResults = aiResults;
+        } else {
+            console.log(`[Match] AI returned 0. Using CSV demo dataset...`);
+            aiOrCsvResults = _csvMatch({ query, location, radius, urgency, top_n });
+        }
+    } catch (err) {
+        console.warn(`[Match] AI service unavailable (${err.message}). Using CSV demo dataset...`);
+        aiOrCsvResults = _csvMatch({ query, location, radius, urgency, top_n });
+    }
+
+    allResults.push(...aiOrCsvResults);
+
+    // Deduplicate and Sort
+    const seen = new Set();
+    const finalResults = [];
+    for (const res of allResults) {
+        const idStr = res.provider_id.toString();
+        if (!seen.has(idStr)) {
+            seen.add(idStr);
+            finalResults.push(res);
+        }
+    }
+
+    return finalResults
+        .sort((a, b) => b.final_score - a.final_score)
+        .slice(0, top_n);
 };
 
 module.exports = { findMatches };
