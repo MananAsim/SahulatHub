@@ -17,8 +17,8 @@ import {
 // Leaflet uses window, so it must be dynamically imported with SSR disabled
 const LiveTrackingMap = dynamic(() => import('@/components/LiveTrackingMap'), { ssr: false });
 
-const STATUS_STEPS = ['open', 'assigned', 'in_progress', 'completed'];
-const STATUS_LABELS = ['Confirmed', 'Assigned', 'In Progress', 'Completed'];
+const STATUS_STEPS = ['open', 'assigned', 'in_progress', 'pending_client_confirmation', 'completed'];
+const STATUS_LABELS = ['Confirmed', 'Assigned', 'Worker Arrived', 'Job Done', 'Completed'];
 
 export default function JobDetailsPage({ params }) {
     const { id } = use(params);
@@ -51,23 +51,6 @@ export default function JobDetailsPage({ params }) {
     const currentStep = STATUS_STEPS.indexOf(task?.status ?? 'open');
     const worker = task?.assigned_worker_id;
     const isCompleted = task?.status === 'completed';
-    const canMarkComplete = task?.status === 'in_progress';
-
-    const handleMarkComplete = async () => {
-        setStatusUpdating(true);
-        try {
-            const res = await apiFetch(`/api/tasks/${id}/status`, {
-                method: 'PATCH',
-                body: JSON.stringify({ status: 'completed' }),
-            });
-            setTask(res.data);
-            setShowReviewModal(true);
-        } catch (err) {
-            alert('Failed to update status: ' + err.message);
-        } finally {
-            setStatusUpdating(false);
-        }
-    };
 
     return (
         <div className={styles.container}>
@@ -126,19 +109,6 @@ export default function JobDetailsPage({ params }) {
                                 <p><strong>Location:</strong> {task.location.lat?.toFixed(4)}°N, {task.location.lng?.toFixed(4)}°E</p>
                             )}
                         </div>
-
-                        {canMarkComplete && (
-                            <Button
-                                style={{ marginTop: 16 }}
-                                onClick={handleMarkComplete}
-                                disabled={statusUpdating}
-                            >
-                                {statusUpdating
-                                    ? <><FaSpinner style={{ animation: 'spin 1s linear infinite', marginRight: 6 }} />Updating...</>
-                                    : '✅ Mark as Completed'
-                                }
-                            </Button>
-                        )}
 
                         {isCompleted && (
                             <div style={{ marginTop: 16 }}>
@@ -201,13 +171,17 @@ export default function JobDetailsPage({ params }) {
                             <div style={{ marginTop: '16px', padding: '12px', background: '#dcfce7', color: '#16a34a', borderRadius: '8px', textAlign: 'center', fontWeight: 'bold' }}>
                                 ✅ Payment Completed
                             </div>
-                        ) : (
+                        ) : task?.status === 'pending_client_confirmation' ? (
                             <Button
-                                style={{ width: '100%', marginTop: '16px' }}
+                                style={{ width: '100%', marginTop: '16px', background: '#10b981', color: 'white', borderColor: '#10b981' }}
                                 onClick={() => router.push(`/client/payment/${id}`)}
                             >
-                                Proceed to Payment
+                                Confirm Job Done & Pay
                             </Button>
+                        ) : (
+                            <div style={{ marginTop: '16px', padding: '12px', background: '#f1f5f9', color: '#64748b', borderRadius: '8px', textAlign: 'center', fontSize: 14 }}>
+                                Payment will unlock once the worker marks the job as done.
+                            </div>
                         )}
                     </Card>
                 </div>

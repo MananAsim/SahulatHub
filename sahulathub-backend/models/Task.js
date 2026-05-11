@@ -36,7 +36,7 @@ const taskSchema = new mongoose.Schema(
         },
         status: {
             type: String,
-            enum: ['open', 'assigned', 'in_progress', 'completed', 'cancelled'],
+            enum: ['open', 'assigned', 'in_progress', 'pending_client_confirmation', 'completed', 'cancelled'],
             default: 'open',
         },
         payment_status: {

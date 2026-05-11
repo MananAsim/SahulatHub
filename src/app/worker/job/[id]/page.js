@@ -32,8 +32,9 @@ export default function WorkerJobDetails({ params }) {
     const statuses = [
         { key: 'open', label: 'Open' },
         { key: 'assigned', label: 'Accepted' },
-        { key: 'in_progress', label: 'Working' },
-        { key: 'completed', label: 'Finished' }
+        { key: 'in_progress', label: 'Working (Arrived)' },
+        { key: 'pending_client_confirmation', label: 'Done - Waiting on Client' },
+        { key: 'completed', label: 'Finished & Paid' }
     ];
 
     const currentStepIndex = task ? statuses.findIndex(s => s.key === task.status) : 0;
@@ -90,15 +91,28 @@ export default function WorkerJobDetails({ params }) {
                             })}
                         </div>
 
-                        {task.status !== 'completed' && currentStepIndex >= 1 && (
+                        {task.status === 'assigned' && (
                             <Button size="large" className={styles.statusButton} onClick={handleNextStatus}>
-                                Mark as {statuses[currentStepIndex + 1]?.label}
+                                Mark as Arrived (Start Working)
                             </Button>
+                        )}
+                        {task.status === 'in_progress' && (
+                            <Button size="large" className={styles.statusButton} onClick={handleNextStatus}>
+                                Job Done - Request Payment
+                            </Button>
+                        )}
+                        {task.status === 'pending_client_confirmation' && (
+                            <div className={styles.successMessage} style={{ background: '#fef3c7', color: '#b45309' }}>
+                                <FaCheck size={32} />
+                                <h3>Waiting for Client</h3>
+                                <p>You have marked this job as done. Waiting for the client to confirm and complete payment.</p>
+                                <Button className="mt-4" onClick={() => router.push('/worker/dashboard')} variant="outline">Back to Dashboard</Button>
+                            </div>
                         )}
                         {task.status === 'completed' && (
                             <div className={styles.successMessage}>
                                 <FaCheck size={32} color="var(--success)" />
-                                <h3>Job Completed Successfully!</h3>
+                                <h3>Job Completed & Paid!</h3>
                                 <p>Rs {task.budget || 'Market Rate'} has been added to your pending balance.</p>
                                 <Button className="mt-4" onClick={() => router.push('/worker/dashboard')}>Return Home</Button>
                             </div>

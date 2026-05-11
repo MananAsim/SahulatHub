@@ -74,7 +74,7 @@ const updateTaskStatus = async (req, res) => {
     try {
         const { status, assigned_worker_id } = req.body;
 
-        const validStatuses = ['open', 'assigned', 'in_progress', 'completed', 'cancelled'];
+        const validStatuses = ['open', 'assigned', 'in_progress', 'pending_client_confirmation', 'completed', 'cancelled'];
         if (!validStatuses.includes(status)) {
             return res.status(400).json({
                 success: false,
@@ -256,6 +256,7 @@ const payTask = async (req, res) => {
         }
 
         task.payment_status = 'paid';
+        task.status = 'completed';
         await task.save();
 
         res.status(200).json({
