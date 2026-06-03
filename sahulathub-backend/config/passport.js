@@ -1,6 +1,5 @@
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const FacebookStrategy = require('passport-facebook').Strategy;
 const User = require('../models/User');
 const generateToken = require('../utils/generateToken');
 
@@ -43,8 +42,6 @@ async function handleOAuthCallback(provider, profile, role, done) {
         let user = null;
         if (provider === 'google') {
             user = await User.findOne({ googleId: profile.id });
-        } else if (provider === 'facebook') {
-            user = await User.findOne({ facebookId: profile.id });
         }
 
         // If not found by provider ID, try by email to link accounts
@@ -74,9 +71,6 @@ async function handleOAuthCallback(provider, profile, role, done) {
             let updated = false;
             if (provider === 'google' && !user.googleId) {
                 user.googleId = profile.id;
-                updated = true;
-            } else if (provider === 'facebook' && !user.facebookId) {
-                user.facebookId = profile.id;
                 updated = true;
             }
             if (updated) {
@@ -117,26 +111,5 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
     console.warn('⚠️  GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET not set — Google OAuth disabled.');
 }
 
-// ─── Facebook OAuth Strategy ──────────────────────────────────────────────────
-if (process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET) {
-    passport.use(
-        new FacebookStrategy(
-            {
-                clientID: process.env.FACEBOOK_APP_ID,
-                clientSecret: process.env.FACEBOOK_APP_SECRET,
-                callbackURL: `${process.env.BACKEND_URL || 'http://localhost:5000'}/api/auth/facebook/callback`,
-                profileFields: ['id', 'displayName', 'emails', 'photos'],
-                passReqToCallback: true,
-            },
-            async (req, accessToken, refreshToken, profile, done) => {
-                const role = req.query.state || 'client';
-                await handleOAuthCallback('facebook', profile, role, done);
-            }
-        )
-    );
-    console.log('🔑 Facebook OAuth strategy loaded.');
-} else {
-    console.warn('⚠️  FACEBOOK_APP_ID / FACEBOOK_APP_SECRET not set — Facebook OAuth disabled.');
-}
 
 module.exports = passport;

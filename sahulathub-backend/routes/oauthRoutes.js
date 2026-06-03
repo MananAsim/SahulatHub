@@ -51,30 +51,5 @@ router.get('/google/callback',
     }
 );
 
-// ─── Facebook OAuth ────────────────────────────────────────────────────────────
-
-// Step 1: Redirect user to Facebook
-router.get('/facebook', (req, res, next) => {
-    const role = req.query.role || 'client';
-    passport.authenticate('facebook', {
-        scope: ['email'],
-        state: role,
-        session: false,
-    })(req, res, next);
-});
-
-// Step 2: Facebook redirects back here with code
-router.get('/facebook/callback',
-    passport.authenticate('facebook', {
-        session: false,
-        failureRedirect: buildErrorRedirect('facebook_auth_failed'),
-    }),
-    (req, res) => {
-        if (!req.user || !req.user.oauthToken) {
-            return res.redirect(buildErrorRedirect('facebook_token_missing'));
-        }
-        res.redirect(buildSuccessRedirect(req.user));
-    }
-);
 
 module.exports = router;

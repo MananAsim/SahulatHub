@@ -123,11 +123,6 @@ export function AuthProvider({ children }) {
         window.location.href = `${API_BASE_URL}/api/auth/google?role=${selectedRole}`;
     };
 
-    const loginWithFacebook = async (selectedRole = 'client') => {
-        localStorage.setItem('sahulat_oauth_role', selectedRole);
-        window.location.href = `${API_BASE_URL}/api/auth/facebook?role=${selectedRole}`;
-    };
-
     // ─── OTP stubs (mock — requires paid Firebase SMS plan) ──────────────────
     const initializeRecaptcha = (_containerId) => { };
 
@@ -173,7 +168,7 @@ export function AuthProvider({ children }) {
             // Registration
             register, registerWorker, registerWorkerWithPassword,
             // Login
-            login, loginWorkerWithPassword, loginWithFacebook, loginWithGoogle,
+            login, loginWorkerWithPassword, loginWithGoogle,
             // OTP (mock)
             initializeRecaptcha, sendVerificationCode, verifyOTP,
             // Logout

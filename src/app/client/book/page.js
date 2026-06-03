@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState, Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { apiFetch } from '@/lib/api';
@@ -49,6 +49,24 @@ function BookingContent() {
     const [aiPowered, setAiPowered] = useState(false);
     const [resultSource, setResultSource] = useState('');
     const [breakdownWorker, setBreakdownWorker] = useState(null);  // AI Explainability
+    const [loadingMessage, setLoadingMessage] = useState('Finding AI Matches...');
+
+    useEffect(() => {
+        let timer1, timer2;
+        if (matchLoading) {
+            setLoadingMessage('Finding AI Matches...');
+            timer1 = setTimeout(() => {
+                setLoadingMessage('Waking up AI Engine (this might take a few seconds)...');
+            }, 3000);
+            timer2 = setTimeout(() => {
+                setLoadingMessage('AI is analyzing requirements...');
+            }, 10000);
+        }
+        return () => {
+            clearTimeout(timer1);
+            clearTimeout(timer2);
+        };
+    }, [matchLoading]);
 
     if (loading || !user) return <div className="section text-center">Loading...</div>;
 
@@ -223,7 +241,7 @@ function BookingContent() {
 
                             <Button type="submit" size="large" disabled={matchLoading}>
                                 {matchLoading ? (
-                                    <><FaSpinner style={{ marginRight: 8, animation: 'spin 1s linear infinite' }} />Finding AI Matches...</>
+                                    <><FaSpinner style={{ marginRight: 8, animation: 'spin 1s linear infinite' }} />{loadingMessage}</>
                                 ) : (
                                     <><FaBolt style={{ marginRight: 8 }} />Find AI Matches</>
                                 )}

@@ -216,7 +216,7 @@ const _ruleBased = async ({ query, location, radius, urgency }) => {
 // ── AI Microservice path ──────────────────────────────────────────────────────
 const _aiMatch = async ({ query, location, radius, urgency, top_n }) => {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 8000);
+    const timeout = setTimeout(() => controller.abort(), 25000);
     try {
         const response = await fetch(`${AI_SERVICE_URL}/match`, {
             method: 'POST',

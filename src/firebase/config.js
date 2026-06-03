@@ -1,5 +1,5 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getAuth, FacebookAuthProvider, GoogleAuthProvider, setPersistence, browserLocalPersistence } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, setPersistence, browserLocalPersistence } from "firebase/auth";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "demo-api-key",
@@ -20,7 +20,6 @@ setPersistence(auth, browserLocalPersistence).catch((error) => {
 });
 
 // Configure Providers
-const facebookProvider = new FacebookAuthProvider();
 const googleProvider = new GoogleAuthProvider();
 
-export { auth, facebookProvider, googleProvider };
+export { auth, googleProvider };

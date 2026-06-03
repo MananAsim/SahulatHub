@@ -28,7 +28,7 @@ function LoginContent() {
 
     const {
         login, register,
-        loginWithFacebook, loginWithGoogle,
+        loginWithGoogle,
         initializeRecaptcha, sendVerificationCode, verifyOTP,
         registerWorkerWithPassword, loginWorkerWithPassword,
     } = useAuth();
@@ -75,19 +75,6 @@ function LoginContent() {
             console.error('Client Auth Error', error);
             setClientError(error.message || (isLogin ? 'Invalid email or password.' : 'Registration failed. Please try again.'));
         } finally {
-            setClientLoading(false);
-        }
-    };
-
-    const handleFacebookLogin = async () => {
-        setClientLoading(true);
-        setClientError('');
-        try {
-            await loginWithFacebook(role);
-            // loginWithFacebook now redirects the browser to OAuth; no router.push needed here
-        } catch (error) {
-            console.error('FB Login Error', error);
-            setClientError('Failed to authenticate with Facebook.');
             setClientLoading(false);
         }
     };
@@ -220,20 +207,6 @@ function LoginContent() {
                         </div>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                            <button
-                                type="button"
-                                onClick={handleFacebookLogin}
-                                disabled={clientLoading}
-                                style={{
-                                    width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px',
-                                    fontWeight: '500', backgroundColor: '#1877F2', color: 'white', padding: '12px 24px',
-                                    borderRadius: '8px', border: 'none', cursor: clientLoading ? 'not-allowed' : 'pointer',
-                                    opacity: clientLoading ? 0.7 : 1, fontSize: '1rem'
-                                }}
-                            >
-                                {clientLoading ? 'Waiting...' : 'Continue with Facebook'}
-                            </button>
-
                             <button
                                 type="button"
                                 onClick={handleGoogleLogin}

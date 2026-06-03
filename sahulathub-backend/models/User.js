@@ -30,7 +30,7 @@ const userSchema = new mongoose.Schema(
         },
         authProvider: {
             type: String,
-            enum: ['local', 'google', 'facebook'],
+            enum: ['local', 'google'],
             default: 'local',
         },
         googleId: {
@@ -38,11 +38,7 @@ const userSchema = new mongoose.Schema(
             sparse: true,
             unique: true,
         },
-        facebookId: {
-            type: String,
-            sparse: true,
-            unique: true,
-        },
+
         profilePhoto: {
             type: String,
         },
