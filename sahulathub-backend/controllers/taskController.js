@@ -40,7 +40,8 @@ const getAvailableTasks = async (req, res) => {
     try {
         const tasks = await Task.find({ status: 'open' })
             .populate('client_id', 'name email rating location')
-            .sort({ createdAt: -1 });
+            .sort({ createdAt: -1 })
+            .limit(100);
 
         res.status(200).json({ success: true, count: tasks.length, data: tasks });
     } catch (error) {
@@ -58,7 +59,8 @@ const getWorkerTasks = async (req, res) => {
     try {
         const tasks = await Task.find({ assigned_worker_id: req.user.id })
             .populate('client_id', 'name email phone rating location')
-            .sort({ createdAt: -1 });
+            .sort({ createdAt: -1 })
+            .limit(100);
 
         res.status(200).json({ success: true, count: tasks.length, data: tasks });
     } catch (error) {
@@ -126,7 +128,8 @@ const getUserTasks = async (req, res) => {
         const tasks = await Task.find(query)
             .populate('client_id', 'name email')
             .populate('assigned_worker_id', 'name email phone rating')
-            .sort({ createdAt: -1 });
+            .sort({ createdAt: -1 })
+            .limit(query.client_id || query.assigned_worker_id ? 100 : 50);
 
         res.status(200).json({ success: true, count: tasks.length, data: tasks });
     } catch (error) {

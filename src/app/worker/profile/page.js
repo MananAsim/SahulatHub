@@ -231,7 +231,7 @@ export default function WorkerProfile() {
                             </div>
                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
                                 {(user.skills || []).length === 0 ? (
-                                    <p style={{ color: '#94a3b8', fontSize: 13 }}>No skills listed yet. Click "Edit Details" to add some.</p>
+                                    <p style={{ color: '#94a3b8', fontSize: 13 }}>No skills listed yet. Click &quot;Edit Details&quot; to add some.</p>
                                 ) : (
                                     (user.skills || []).map((sk) => (
                                         <span key={sk} style={{
@@ -278,7 +278,7 @@ export default function WorkerProfile() {
                                                 ))}
                                             </div>
                                             {rev.comment && (
-                                                <p className={styles.reviewText}>"{rev.comment}"</p>
+                                                <p className={styles.reviewText}>&quot;{rev.comment}&quot;</p>
                                             )}
                                             {rev.task_id?.title && (
                                                 <p style={{ fontSize: 11, color: '#94a3b8', marginTop: 4 }}>

@@ -36,9 +36,11 @@ export default function WorkerChatPage({ params }) {
     };
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         fetchChat();
         const interval = setInterval(fetchChat, 3000);
         return () => clearInterval(interval);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id]);
 
     useEffect(() => {

@@ -53,6 +53,7 @@ export default function LiveTrackingMap({ clientLocation, workerLocation, isComp
     // Initialize positions
     useEffect(() => {
         if (clientLocation?.lat && clientLocation?.lng) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setClientPos([clientLocation.lat, clientLocation.lng]);
         }
 
@@ -76,6 +77,7 @@ export default function LiveTrackingMap({ clientLocation, workerLocation, isComp
 
         // If very close, snap to client
         if (Math.abs(dLat) < 0.0001 && Math.abs(dLng) < 0.0001) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setWorkerPos(clientPos);
             return;
         }

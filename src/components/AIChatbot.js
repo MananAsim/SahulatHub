@@ -312,6 +312,7 @@ export default function AIChatbot({ role: propRole }) {
                     {/* Image preview strip */}
                     {imagePreview && (
                         <div className={styles.imagePreviewStrip}>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img src={imagePreview} alt="upload preview" className={styles.imageThumb} />
                             <span className={styles.imagePreviewLabel}>Image ready to analyze</span>
                             <button className={styles.removeImageBtn} onClick={clearImage}>✕</button>
@@ -352,7 +353,7 @@ export default function AIChatbot({ role: propRole }) {
                         </p>
                         {input && voiceStatus === 'done' && (
                             <div className={styles.vTranscript}>
-                                <p>"{input}"</p>
+                                <p>&quot;{input}&quot;</p>
                                 <button id="voice-send-btn" className={styles.vSend} onClick={() => { setTab('chat'); send(input); }}>
                                     Send to Sahal →
                                 </button>

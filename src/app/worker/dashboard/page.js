@@ -270,7 +270,7 @@ export default function WorkerDashboard() {
                                         <div>
                                             <h3 className={styles.reqTitle}>{rev.client_id?.name || 'Client'}</h3>
                                             <p className={styles.reqLocation} style={{ fontSize: 13, color: '#64748b', marginTop: 4 }}>
-                                                "{rev.comment}"
+                                                &quot;{rev.comment}&quot;
                                             </p>
                                         </div>
                                         <div>

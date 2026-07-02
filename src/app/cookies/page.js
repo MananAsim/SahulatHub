@@ -26,7 +26,7 @@ export default function CookiesPage() {
 
                 <section>
                     <h2>Your choices regarding cookies</h2>
-                    <p>If you'd like to delete cookies or instruct your web browser to delete or refuse cookies, please visit the help pages of your web browser.</p>
+                    <p>If you&apos;d like to delete cookies or instruct your web browser to delete or refuse cookies, please visit the help pages of your web browser.</p>
                     <p>Please note, however, that if you delete cookies or refuse to accept them, you might not be able to use all of the features we offer, you may not be able to store your preferences, and some of our pages might not display properly.</p>
                 </section>
             </div>

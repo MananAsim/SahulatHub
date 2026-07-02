@@ -26,7 +26,7 @@ export default function TermsPage() {
 
                 <section>
                     <h2>3. Disclaimer</h2>
-                    <p>The materials on SahulatHub are provided on an 'as is' basis. SahulatHub makes no warranties, expressed or implied, and hereby disclaims all other warranties including, without limitation, implied warranties or conditions of merchantability, fitness for a particular purpose, or non-infringement of intellectual property.</p>
+                    <p>The materials on SahulatHub are provided on an &apos;as is&apos; basis. SahulatHub makes no warranties, expressed or implied, and hereby disclaims all other warranties including, without limitation, implied warranties or conditions of merchantability, fitness for a particular purpose, or non-infringement of intellectual property.</p>
                 </section>
 
                 <section>
