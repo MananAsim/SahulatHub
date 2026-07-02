@@ -180,11 +180,13 @@ async function handleAgenticText({ messages, role, token }) {
 
     } catch (err) {
         console.warn('[AgenticText] Error:', err.message);
+        const lastMsg = [...messages].reverse().find(m => m.role === 'user')?.content || '';
+        
         // If it's a rate limit error, tell the user gracefully
         if (err.message.includes('429')) {
              return Response.json({ success: true, message: "I'm thinking a bit too fast! Please wait a few seconds before asking the next question.", source: 'rate_limit' });
         }
-        return Response.json({ success: true, message: getFallbackResponse(''), source: 'fallback' });
+        return Response.json({ success: true, message: getFallbackResponse(lastMsg), source: 'fallback' });
     }
 }
 
