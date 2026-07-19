@@ -31,8 +31,8 @@ export default function WorkerJobDetails({ params }) {
 
     const statuses = [
         { key: 'open', label: 'Open' },
-        { key: 'assigned', label: 'Accepted' },
-        { key: 'in_progress', label: 'Working (Arrived)' },
+        { key: 'assigned', label: 'Pending Acceptance' },
+        { key: 'in_progress', label: 'Accepted & En Route' },
         { key: 'pending_client_confirmation', label: 'Done - Waiting on Client' },
         { key: 'completed', label: 'Finished & Paid' }
     ];
@@ -93,7 +93,7 @@ export default function WorkerJobDetails({ params }) {
 
                         {task.status === 'assigned' && (
                             <Button size="large" className={styles.statusButton} onClick={handleNextStatus}>
-                                Mark as Arrived (Start Working)
+                                Accept Job & Start Route
                             </Button>
                         )}
                         {task.status === 'in_progress' && (
@@ -150,11 +150,17 @@ export default function WorkerJobDetails({ params }) {
                             </div>
                         </div>
 
-                        <div className={styles.actionButtons}>
-                            <Button variant="outline" className={styles.btnIcon}><FaPhoneAlt /> Call</Button>
-                            <Button variant="outline" className={styles.btnIcon} onClick={() => router.push(`/worker/job/${task._id}/chat`)}><FaComments /> Chat</Button>
-                            <Button className={styles.btnIcon} style={{ flex: 1 }}><FaMapMarkerAlt /> Navigate</Button>
-                        </div>
+                        {task.status !== 'open' && task.status !== 'assigned' ? (
+                            <div className={styles.actionButtons}>
+                                <Button variant="outline" className={styles.btnIcon}><FaPhoneAlt /> Call</Button>
+                                <Button variant="outline" className={styles.btnIcon} onClick={() => router.push(`/worker/job/${task._id}/chat`)}><FaComments /> Chat</Button>
+                                <Button className={styles.btnIcon} style={{ flex: 1 }}><FaMapMarkerAlt /> Navigate</Button>
+                            </div>
+                        ) : (
+                            <p style={{ fontSize: 13, color: '#94a3b8', textAlign: 'center', marginTop: 16 }}>
+                                Communication and navigation will unlock after you accept the job.
+                            </p>
+                        )}
                     </Card>
                 </div>
             </main>

@@ -46,9 +46,10 @@ function MapBounds({ clientPos, workerPos }) {
     return null;
 }
 
-export default function LiveTrackingMap({ clientLocation, workerLocation, isCompleted, workerName }) {
+export default function LiveTrackingMap({ clientLocation, workerLocation, isCompleted, workerName, onArrived }) {
     const [workerPos, setWorkerPos] = useState(null);
     const [clientPos, setClientPos] = useState(null);
+    const [hasArrived, setHasArrived] = useState(false);
 
     // Initialize positions
     useEffect(() => {
@@ -79,6 +80,10 @@ export default function LiveTrackingMap({ clientLocation, workerLocation, isComp
         if (Math.abs(dLat) < 0.0001 && Math.abs(dLng) < 0.0001) {
             // eslint-disable-next-line react-hooks/set-state-in-effect
             setWorkerPos(clientPos);
+            if (!hasArrived) {
+                setHasArrived(true);
+                if (onArrived) onArrived();
+            }
             return;
         }
 

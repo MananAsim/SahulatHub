@@ -18,7 +18,7 @@ import {
 const LiveTrackingMap = dynamic(() => import('@/components/LiveTrackingMap'), { ssr: false });
 
 const STATUS_STEPS = ['open', 'assigned', 'in_progress', 'pending_client_confirmation', 'completed'];
-const STATUS_LABELS = ['Confirmed', 'Assigned', 'Worker Arrived', 'Job Done', 'Completed'];
+const STATUS_LABELS = ['Confirmed', 'Pending Worker', 'Worker Accepted', 'Job Done', 'Completed'];
 
 export default function JobDetailsPage({ params }) {
     const { id } = use(params);
@@ -30,6 +30,7 @@ export default function JobDetailsPage({ params }) {
     const [taskError, setTaskError] = useState('');
     const [statusUpdating, setStatusUpdating] = useState(false);
     const [showReviewModal, setShowReviewModal] = useState(false);
+    const [isWorkerArrived, setIsWorkerArrived] = useState(false);
 
     // Load the task from DB
     useEffect(() => {
@@ -51,6 +52,11 @@ export default function JobDetailsPage({ params }) {
     const currentStep = STATUS_STEPS.indexOf(task?.status ?? 'open');
     const worker = task?.assigned_worker_id;
     const isCompleted = task?.status === 'completed';
+    const hasWorkerAccepted = currentStep >= 2; // 'in_progress' or later
+    
+    const handleWorkerArrived = async () => {
+        setIsWorkerArrived(true);
+    };
 
     return (
         <div className={styles.container}>
@@ -83,18 +89,28 @@ export default function JobDetailsPage({ params }) {
                             ))}
                         </div>
 
-                        {/* Real Interactive Map for Live Tracking */}
-                        <div style={{ marginTop: '24px', marginBottom: '8px', border: '1px solid #e2e8f0', borderRadius: '12px', overflow: 'hidden' }}>
-                            <LiveTrackingMap
-                                clientLocation={task?.location}
-                                workerLocation={task?.worker_location || null}
-                                isCompleted={isCompleted}
-                                workerName={worker?.name}
-                            />
-                        </div>
-                        <p className={styles.eta} style={{ textAlign: 'center', marginTop: '12px', fontWeight: 600, color: isCompleted ? '#16a34a' : '#2563eb' }}>
-                            {isCompleted ? 'Job Completed ✅' : 'Worker en route...'}
-                        </p>
+                        {hasWorkerAccepted ? (
+                            <>
+                                <div style={{ marginTop: '24px', marginBottom: '8px', border: '1px solid #e2e8f0', borderRadius: '12px', overflow: 'hidden' }}>
+                                    <LiveTrackingMap
+                                        clientLocation={task?.location}
+                                        workerLocation={worker?.location || null}
+                                        isCompleted={isCompleted}
+                                        workerName={worker?.name}
+                                        onArrived={handleWorkerArrived}
+                                    />
+                                </div>
+                                <p className={styles.eta} style={{ textAlign: 'center', marginTop: '12px', fontWeight: 600, color: isCompleted || isWorkerArrived ? '#16a34a' : '#2563eb' }}>
+                                    {isCompleted ? 'Job Completed ✅' : isWorkerArrived ? 'Worker Arrived. Job is in progress 🔧' : 'Worker en route...'}
+                                </p>
+                            </>
+                        ) : currentStep === 1 ? (
+                            <div style={{ marginTop: '24px', padding: '24px', background: '#fef3c7', borderRadius: '12px', textAlign: 'center', color: '#b45309' }}>
+                                <FaSpinner style={{ animation: 'spin 1s linear infinite', fontSize: 24, marginBottom: 12 }} />
+                                <h3 style={{ marginBottom: 8 }}>Waiting for Worker Confirmation</h3>
+                                <p style={{ fontSize: 14 }}>{worker?.name || 'Your worker'} has been booked and is reviewing the details. Live tracking and chat will unlock once they accept the job.</p>
+                            </div>
+                        ) : null}
                     </Card>
 
                     {/* Real Job Details */}
@@ -146,17 +162,23 @@ export default function JobDetailsPage({ params }) {
                             </p>
                         )}
 
-                        <div className={styles.communication}>
-                            <button
-                                className={styles.commBtn}
-                                onClick={() => router.push(`/client/job/${id}/chat`)}
-                                title="Chat"
-                            >
-                                <FaCommentDots />
-                            </button>
-                            <button className={styles.commBtn} title="Call"><FaPhoneAlt /></button>
-                            <button className={styles.commBtn} title="Video"><FaVideo /></button>
-                        </div>
+                        {hasWorkerAccepted ? (
+                            <div className={styles.communication}>
+                                <button
+                                    className={styles.commBtn}
+                                    onClick={() => router.push(`/client/job/${id}/chat`)}
+                                    title="Chat"
+                                >
+                                    <FaCommentDots />
+                                </button>
+                                <button className={styles.commBtn} title="Call"><FaPhoneAlt /></button>
+                                <button className={styles.commBtn} title="Video"><FaVideo /></button>
+                            </div>
+                        ) : currentStep === 1 ? (
+                            <p style={{ fontSize: 13, color: '#94a3b8', textAlign: 'center', marginTop: 12 }}>
+                                Communication unlocks when the worker accepts the job.
+                            </p>
+                        ) : null}
                     </Card>
 
                     <Card className="mt-4">
