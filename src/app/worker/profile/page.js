@@ -30,6 +30,7 @@ export default function WorkerProfile() {
     const [editSkills, setEditSkills] = useState([]);
     const [editPrice, setEditPrice] = useState(0);
     const [editLocation, setEditLocation] = useState({ lat: 0, lng: 0 });
+    const [editPhoto, setEditPhoto] = useState('');
     const [locSyncing, setLocSyncing] = useState(false);
     const [reviewModal, setReviewModal] = useState(null); // { taskId } — unused on profile page
 
@@ -53,6 +54,7 @@ export default function WorkerProfile() {
             setEditSkills(user.skills || []);
             setEditPrice(user.base_price || 0);
             setEditLocation(user.location || { lat: 0, lng: 0 });
+            setEditPhoto(user.profilePhoto || '');
         }
     }, [user]);
 
@@ -77,14 +79,15 @@ export default function WorkerProfile() {
         try {
             const res = await apiFetch('/api/auth/profile', {
                 method: 'PUT',
-                body: JSON.stringify({ name: editName, skills: editSkills, base_price: editPrice, location: editLocation }),
+                body: JSON.stringify({ name: editName, skills: editSkills, base_price: editPrice, location: editLocation, profilePhoto: editPhoto }),
             });
             if (setUser) setUser((prev) => ({ 
                 ...prev, 
                 name: res.data.name, 
                 skills: res.data.skills, 
                 base_price: res.data.base_price,
-                location: res.data.location 
+                location: res.data.location,
+                profilePhoto: res.data.profilePhoto
             }));
             setProfileMsg('Profile updated successfully!');
             setEditMode(false);
@@ -148,7 +151,11 @@ export default function WorkerProfile() {
                     <div className={styles.leftCol}>
                         <Card className={styles.userCard}>
                             <div className={styles.avatarLarge}>
-                                {(user.name || 'W').charAt(0).toUpperCase()}
+                                {user.profilePhoto ? (
+                                    <img src={user.profilePhoto} alt="Profile" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                                ) : (
+                                    (user.name || 'W').charAt(0).toUpperCase()
+                                )}
                             </div>
                             <h2 className={styles.userName}>{user.name || 'Worker'}</h2>
 
@@ -252,6 +259,16 @@ export default function WorkerProfile() {
                                         type="text"
                                         value={editName}
                                         onChange={(e) => setEditName(e.target.value)}
+                                        style={{ width: '100%', padding: '8px 12px', borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 14 }}
+                                    />
+                                </div>
+                                <div style={{ marginBottom: 12 }}>
+                                    <label style={{ fontSize: 13, fontWeight: 600, display: 'block', marginBottom: 4 }}>Profile Picture URL</label>
+                                    <input
+                                        type="text"
+                                        value={editPhoto}
+                                        onChange={(e) => setEditPhoto(e.target.value)}
+                                        placeholder="https://example.com/photo.jpg"
                                         style={{ width: '100%', padding: '8px 12px', borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 14 }}
                                     />
                                 </div>

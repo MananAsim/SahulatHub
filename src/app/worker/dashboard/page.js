@@ -61,10 +61,45 @@ export default function WorkerDashboard() {
         }
     }, [authLoading, user, fetchDashboardData]);
 
+    useEffect(() => {
+        if (!authLoading && (!user || role !== 'worker')) {
+            router.push('/auth/login?role=worker');
+        }
+    }, [user, role, authLoading, router]);
+
+    // Live Location Tracking
+    useEffect(() => {
+        if (user && role === 'worker' && isOnline) {
+            if ('geolocation' in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                    async (position) => {
+                        try {
+                            await apiFetch('/api/auth/profile', {
+                                method: 'PUT',
+                                body: JSON.stringify({
+                                    location: {
+                                        lat: position.coords.latitude,
+                                        lng: position.coords.longitude
+                                    }
+                                })
+                            });
+                            console.log('Live location updated successfully.');
+                        } catch (err) {
+                            console.error('Failed to update live location:', err);
+                        }
+                    },
+                    (error) => console.error('Geolocation error:', error),
+                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                );
+            }
+        }
+    }, [user, role, isOnline]);
+
     // ── Guard ─────────────────────────────────────────────────────────────────
     if (authLoading || !user) {
         return <div className="section text-center">Loading dashboard...</div>;
     }
+    if (role !== 'worker') return null;
 
     const handleAcceptJob = (taskId) => {
         router.push(`/worker/job/${taskId}`);

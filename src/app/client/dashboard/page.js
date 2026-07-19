@@ -61,6 +61,7 @@ export default function ClientDashboard() {
     }, [loading, user, fetchTasks]);
 
     if (loading || !user) return <div className="section text-center">Loading dashboard...</div>;
+    if (role !== 'client') return null;
 
     const filteredServices = SERVICES.filter((s) =>
         s.title.toLowerCase().includes(searchQuery.toLowerCase())

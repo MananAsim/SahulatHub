@@ -73,6 +73,15 @@ async function handleOAuthCallback(provider, profile, role, done) {
                 user.googleId = profile.id;
                 updated = true;
             }
+            
+            // Allow dynamic role switching for dual-role accounts!
+            const targetRole = ['client', 'worker'].includes(role) ? role : 'client';
+            if (user.role !== targetRole) {
+                user.role = targetRole;
+                updated = true;
+                console.log(`🔄 [OAuth] Switched user role to: ${targetRole}`);
+            }
+
             if (updated) {
                 await user.save();
             }

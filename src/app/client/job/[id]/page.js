@@ -32,13 +32,25 @@ export default function JobDetailsPage({ params }) {
     const [showReviewModal, setShowReviewModal] = useState(false);
     const [isWorkerArrived, setIsWorkerArrived] = useState(false);
 
-    // Load the task from DB
+    // Load the task from DB periodically (polling)
     useEffect(() => {
+        const fetchTask = async () => {
+            try {
+                const res = await apiFetch(`/api/tasks/${id}`);
+                setTask(res.data);
+                setTaskError('');
+            } catch (err) {
+                setTaskError(err.message || 'Failed to load task details.');
+            } finally {
+                setTaskLoading(false);
+            }
+        };
+
         if (!id) return;
-        apiFetch(`/api/tasks/${id}`)
-            .then((res) => setTask(res.data))
-            .catch((err) => setTaskError(err.message))
-            .finally(() => setTaskLoading(false));
+        fetchTask(); // initial fetch
+        const intervalId = setInterval(fetchTask, 5000); // Poll every 5s
+
+        return () => clearInterval(intervalId);
     }, [id]);
 
     if (loading || !user) return <div className="section text-center">Loading...</div>;

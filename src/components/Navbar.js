@@ -36,6 +36,7 @@ export default function Navbar() {
                             <div style={{ display: 'flex', gap: '24px' }}>
                                 <Link href="/client/dashboard" className={styles.link}>Dashboard</Link>
                                 <Link href="/client/book" className={styles.link}>Book Service</Link>
+                                <Link href="/client/profile" className={styles.link}>My Profile</Link>
                             </div>
                         ) : (
                             <div style={{ display: 'flex', gap: '24px' }}>
@@ -51,6 +52,9 @@ export default function Navbar() {
                 <div className={styles.navRight}>
                     {!mounted ? null : user ? (
                         <div className={styles.userMenu}>
+                            {user.profilePhoto ? (
+                                <img src={user.profilePhoto} alt="Profile" style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover' }} />
+                            ) : null}
                             <span className={styles.greeting}>Hi, {user.name} ({role})</span>
                             <Link href={getDashboardLink()} className={styles.dashboardBtn}>
                                 Dashboard

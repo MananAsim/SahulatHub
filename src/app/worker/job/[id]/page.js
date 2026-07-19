@@ -26,7 +26,11 @@ export default function WorkerJobDetails({ params }) {
                 setLoading(false);
             }
         };
+
         fetchTask();
+        const intervalId = setInterval(fetchTask, 5000);
+
+        return () => clearInterval(intervalId);
     }, [id]);
 
     const statuses = [
