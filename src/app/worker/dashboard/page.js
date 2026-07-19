@@ -8,7 +8,7 @@ import Card from '@/components/Card';
 import Button from '@/components/Button';
 import AIChatbot from '@/components/AIChatbot';
 import styles from './page.module.css';
-import { FaMoneyBillWave, FaCheckCircle, FaStar, FaMapMarkerAlt, FaWifi, FaSpinner } from 'react-icons/fa';
+import { FaMoneyBillWave, FaCheckCircle, FaStar, FaMapMarkerAlt, FaWifi, FaSpinner, FaExclamationTriangle } from 'react-icons/fa';
 
 export default function WorkerDashboard() {
     const { user, role, loading: authLoading } = useAuth();
@@ -75,6 +75,10 @@ export default function WorkerDashboard() {
         (t) => t.status === 'assigned' || t.status === 'in_progress'
     );
 
+    const isProfileComplete = (user.skills && user.skills.length > 0) && 
+                              (user.location && user.location.lat !== 0) && 
+                              (user.base_price > 0);
+
     return (
         <div className={styles.container}>
             <header className={styles.header}>
@@ -104,6 +108,28 @@ export default function WorkerDashboard() {
             </header>
 
             <main className={styles.mainContent}>
+                {!isProfileComplete && (
+                    <div style={{
+                        background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: 12, 
+                        padding: 16, marginBottom: 24, display: 'flex', gap: 12, alignItems: 'center',
+                        justifyContent: 'space-between', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)'
+                    }}>
+                        <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                            <FaExclamationTriangle style={{ color: '#ef4444', fontSize: 24, flexShrink: 0, marginTop: 4 }} />
+                            <div>
+                                <h4 style={{ color: '#991b1b', marginBottom: 4, fontSize: 16, fontWeight: 700 }}>Action Required: Complete Your Profile</h4>
+                                <p style={{ color: '#b91c1c', fontSize: 14, margin: 0, lineHeight: 1.5 }}>
+                                    You are currently <strong>invisible</strong> to the Matchmaking Engine! 
+                                    Add your skills, location, and base price to start receiving jobs.
+                                </p>
+                            </div>
+                        </div>
+                        <Button onClick={() => router.push('/worker/profile')} style={{ flexShrink: 0, background: '#ef4444', borderColor: '#ef4444', color: '#fff' }}>
+                            Complete Profile Now
+                        </Button>
+                    </div>
+                )}
+
                 {/* ── Stats Cards ──────────────────────────────────────────────── */}
                 <div className={styles.metricsGrid}>
                     <Card className={styles.metricCard}>

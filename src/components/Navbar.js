@@ -1,10 +1,16 @@
 'use client';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '../context/AuthContext';
 import styles from './Navbar.module.css';
 
 export default function Navbar() {
     const { user, role, logout } = useAuth();
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     const getDashboardLink = () => {
         if (role === 'client') return '/client/dashboard';
@@ -21,15 +27,29 @@ export default function Navbar() {
                         SahulatHub
                     </Link>
                     <div className={styles.links}>
-                        <Link href="/" className={styles.link}>Home</Link>
-                        <Link href="/#services" className={styles.link}>Services</Link>
-                        <Link href="/about" className={styles.link}>About Us</Link>
-                        <Link href="/contact" className={styles.link}>Contact</Link>
+                        {!mounted ? null : role === 'worker' ? (
+                            <div style={{ display: 'flex', gap: '24px' }}>
+                                <Link href="/worker/dashboard" className={styles.link}>Dashboard</Link>
+                                <Link href="/worker/profile" className={styles.link}>My Profile</Link>
+                            </div>
+                        ) : role === 'client' ? (
+                            <div style={{ display: 'flex', gap: '24px' }}>
+                                <Link href="/client/dashboard" className={styles.link}>Dashboard</Link>
+                                <Link href="/client/book" className={styles.link}>Book Service</Link>
+                            </div>
+                        ) : (
+                            <div style={{ display: 'flex', gap: '24px' }}>
+                                <Link href="/" className={styles.link}>Home</Link>
+                                <Link href="/#services" className={styles.link}>Services</Link>
+                                <Link href="/about" className={styles.link}>About Us</Link>
+                                <Link href="/contact" className={styles.link}>Contact</Link>
+                            </div>
+                        )}
                     </div>
                 </div>
 
                 <div className={styles.navRight}>
-                    {user ? (
+                    {!mounted ? null : user ? (
                         <div className={styles.userMenu}>
                             <span className={styles.greeting}>Hi, {user.name} ({role})</span>
                             <Link href={getDashboardLink()} className={styles.dashboardBtn}>
