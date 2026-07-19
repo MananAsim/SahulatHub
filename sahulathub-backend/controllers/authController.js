@@ -90,6 +90,7 @@ const register = async (req, res) => {
                 location: user.location,
                 skills: user.skills,
                 availability: user.availability,
+                base_price: user.base_price,
             },
             token,
         });
@@ -137,6 +138,7 @@ const login = async (req, res) => {
                 location: user.location,
                 skills: user.skills,
                 availability: user.availability,
+                base_price: user.base_price,
             },
             token,
         });
@@ -187,6 +189,7 @@ const workerLogin = async (req, res) => {
                 location: user.location,
                 skills: user.skills,
                 availability: user.availability,
+                base_price: user.base_price,
             },
             token,
         });
@@ -244,6 +247,7 @@ const updateProfile = async (req, res) => {
                 location: user.location,
                 skills: user.skills,
                 availability: user.availability,
+                base_price: user.base_price,
             },
         });
     } catch (error) {
