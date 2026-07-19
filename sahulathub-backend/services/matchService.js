@@ -177,10 +177,9 @@ const _ruleBased = async ({ query, location, radius, urgency }) => {
             if (distKm > radius) return null;
 
             const proximity = _computeProximityScore(worker.location, location, radius);
-            const qWords = (query || '').toLowerCase().split(/\s+/);
-            const wSkills = (worker.skills || []).map(s => s.toLowerCase());
-            const skillMatch = qWords.filter(w => wSkills.some(s => s.includes(w))).length;
-            const skillScore = wSkills.length > 0 ? skillMatch / Math.max(qWords.length, 1) : 0.3;
+            const wSkills = worker.skills || [];
+            const hasSkillMatch = wSkills.some(s => _skillMatches(s, query));
+            const skillScore = hasSkillMatch ? 1.0 : (wSkills.length > 0 ? 0.2 : 0.0);
             const ratingScore = (worker.rating || 0) / 5;
             const finalScore = parseFloat(
                 (proximity * 0.4 + skillScore * 0.35 + urgencyFactor * 0.1 + ratingScore * 0.15).toFixed(4)
@@ -194,6 +193,8 @@ const _ruleBased = async ({ query, location, radius, urgency }) => {
                 rating: worker.rating,
                 availability: worker.availability,
                 location: worker.location,
+                base_price: worker.base_price ? `Rs ${worker.base_price}` : null,
+                price_negotiable: true,
                 distance_km: parseFloat(distKm.toFixed(1)),
                 final_score: finalScore,
                 ai_scored: false,

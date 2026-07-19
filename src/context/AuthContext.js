@@ -136,11 +136,25 @@ export function AuthProvider({ children }) {
         return { uid: 'worker-mock', phoneNumber: '+923001234567' };
     };
 
-    // @deprecated — use registerWorker() instead
-    const registerWorkerWithPassword = async (phone, password, selectedRole = 'worker') => {
-        const mockWorker = { id: 'worker-' + phone, name: 'New Worker', phoneNumber: phone, role: selectedRole };
-        _setMockSession(mockWorker, selectedRole);
-        return mockWorker;
+    // Used for Worker Signup flow
+    const registerWorkerWithPassword = async (phone, password, selectedRole = 'worker', name = 'New Worker') => {
+        // We generate a dummy email because the schema requires it currently, or backend handles it.
+        // Wait, backend requires email? Let's check authController.js register.
+        // Actually, authController.js `register` might require email.
+        const dummyEmail = `${phone.replace('+', '')}@worker.sahulathub.com`;
+        
+        const data = await apiFetch('/api/auth/register', {
+            method: 'POST',
+            body: JSON.stringify({
+                name: name,
+                email: dummyEmail,
+                phone: phone,
+                password: password,
+                role: selectedRole,
+            }),
+        });
+        _persistSession(data.data, data.token);
+        return data.data;
     };
 
     // ─── Internal mock session helper ─────────────────────────────────────────

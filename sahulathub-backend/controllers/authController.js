@@ -227,6 +227,7 @@ const updateProfile = async (req, res) => {
         if (location) user.location = location;
         if (skills && Array.isArray(skills)) user.skills = skills;
         if (availability !== undefined) user.availability = Boolean(availability);
+        if (req.body.base_price !== undefined) user.base_price = Number(req.body.base_price);
 
         await user.save();
 

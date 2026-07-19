@@ -11,7 +11,7 @@ import AIChatbot from '@/components/AIChatbot';
 import styles from './page.module.css';
 import {
     FaWrench, FaBolt, FaSnowflake, FaBroom, FaPaintRoller,
-    FaHammer, FaSearch, FaSpinner,
+    FaHammer, FaSearch, FaSpinner, FaTrash,
 } from 'react-icons/fa';
 
 const SERVICES = [
@@ -67,6 +67,16 @@ export default function ClientDashboard() {
     );
 
     const handleBookService = (serviceTitle) => router.push(`/client/book?service=${serviceTitle}`);
+
+    const handleDeleteTask = async (taskId) => {
+        if (!window.confirm('Are you sure you want to delete this job from your history?')) return;
+        try {
+            await apiFetch(`/api/tasks/${taskId}`, { method: 'DELETE' });
+            fetchTasks();
+        } catch (err) {
+            alert(err.message || 'Failed to delete task');
+        }
+    };
 
     return (
         <div className={styles.container}>
@@ -150,13 +160,24 @@ export default function ClientDashboard() {
                                             </p>
                                         </div>
                                     </div>
-                                    <Button
-                                        variant="outline"
-                                        size="small"
-                                        onClick={() => router.push(`/client/job/${task._id}`)}
-                                    >
-                                        {task.status === 'completed' ? 'View' : 'Track'}
-                                    </Button>
+                                    <div style={{ display: 'flex', gap: '8px' }}>
+                                        <Button
+                                            variant="outline"
+                                            size="small"
+                                            onClick={() => router.push(`/client/job/${task._id}`)}
+                                        >
+                                            {task.status === 'completed' ? 'View' : 'Track'}
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            size="small"
+                                            style={{ borderColor: '#fca5a5', color: '#ef4444' }}
+                                            onClick={() => handleDeleteTask(task._id)}
+                                            title="Hide from history"
+                                        >
+                                            <FaTrash />
+                                        </Button>
+                                    </div>
                                 </Card>
                             ))
                         )}

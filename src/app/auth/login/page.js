@@ -288,7 +288,14 @@ function LoginContent() {
                             <form onSubmit={handleSendOTP} className={styles.form}>
                                 <div className={styles.inputGroup}>
                                     <label htmlFor="name">Full Name</label>
-                                    <input type="text" id="name" placeholder="John Doe" required />
+                                    <input 
+                                        type="text" 
+                                        id="name" 
+                                        placeholder="John Doe" 
+                                        required 
+                                        value={name}
+                                        onChange={(e) => setName(e.target.value)}
+                                    />
                                 </div>
                                 <div className={styles.inputGroup}>
                                     <label htmlFor="cnicFront">Front side picture of CNIC <span style={{ color: 'red' }}>*</span></label>
@@ -347,9 +354,9 @@ function LoginContent() {
                                     // 1. Verify OTP first
                                     await verifyOTP(otp);
 
-                                    // 2. Create Password Profile using Email/Password auth mapping
+                                    // 2. Create Password Profile using backend
                                     const formattedPhone = phone.startsWith('+') ? phone : `+92${phone.replace(/^0+/, '')}`;
-                                    await registerWorkerWithPassword(formattedPhone, password, role);
+                                    await registerWorkerWithPassword(formattedPhone, password, role, name);
 
                                     const redirect = searchParams.get('redirect');
                                     router.push(redirect ? redirect : '/worker/dashboard');

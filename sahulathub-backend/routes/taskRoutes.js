@@ -11,6 +11,7 @@ const {
     payTask,
     getTaskChat,
     postTaskChat,
+    deleteTask,
 } = require('../controllers/taskController');
 const { protect } = require('../middleware/authMiddleware');
 const { authorizeRoles } = require('../middleware/roleMiddleware');
@@ -34,6 +35,9 @@ router.get('/:id', protect, getTaskById);
 
 // @route   PATCH /api/tasks/:id/status
 router.patch('/:id/status', protect, updateTaskStatus);
+
+// @route   DELETE /api/tasks/:id
+router.delete('/:id', protect, authorizeRoles('client', 'admin'), deleteTask);
 
 // @route   POST /api/tasks/:id/assign — client picks a real DB worker
 router.post('/:id/assign', protect, authorizeRoles('client'), assignTask);

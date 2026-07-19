@@ -11,6 +11,7 @@ import styles from './page.module.css';
 import {
     FaArrowLeft, FaStar, FaUserEdit, FaToolbox, FaPhoneAlt,
     FaEnvelope, FaMapMarkerAlt, FaSignOutAlt, FaSpinner, FaToggleOn, FaToggleOff,
+    FaExclamationTriangle, FaCrosshairs, FaCheckCircle,
 } from 'react-icons/fa';
 
 const ALL_SKILLS = ['Plumbing', 'Electrical', 'AC Repair', 'Carpentry', 'Painting', 'Cleaning'];
@@ -27,6 +28,9 @@ export default function WorkerProfile() {
     const [editMode, setEditMode] = useState(false);
     const [editName, setEditName] = useState('');
     const [editSkills, setEditSkills] = useState([]);
+    const [editPrice, setEditPrice] = useState(0);
+    const [editLocation, setEditLocation] = useState({ lat: 0, lng: 0 });
+    const [locSyncing, setLocSyncing] = useState(false);
     const [reviewModal, setReviewModal] = useState(null); // { taskId } — unused on profile page
 
     useEffect(() => {
@@ -47,6 +51,8 @@ export default function WorkerProfile() {
         if (user) {
             setEditName(user.name || '');
             setEditSkills(user.skills || []);
+            setEditPrice(user.base_price || 0);
+            setEditLocation(user.location || { lat: 0, lng: 0 });
         }
     }, [user]);
 
@@ -71,16 +77,41 @@ export default function WorkerProfile() {
         try {
             const res = await apiFetch('/api/auth/profile', {
                 method: 'PUT',
-                body: JSON.stringify({ name: editName, skills: editSkills }),
+                body: JSON.stringify({ name: editName, skills: editSkills, base_price: editPrice, location: editLocation }),
             });
-            if (setUser) setUser((prev) => ({ ...prev, name: res.data.name, skills: res.data.skills }));
-            setProfileMsg('Profile updated!');
+            if (setUser) setUser((prev) => ({ 
+                ...prev, 
+                name: res.data.name, 
+                skills: res.data.skills, 
+                base_price: res.data.base_price,
+                location: res.data.location 
+            }));
+            setProfileMsg('Profile updated successfully!');
             setEditMode(false);
         } catch (err) {
             setProfileMsg(err.message || 'Failed to save profile');
         } finally {
             setProfileSaving(false);
         }
+    };
+
+    const handleSyncLocation = () => {
+        if (!navigator.geolocation) {
+            setProfileMsg("Geolocation is not supported by your browser.");
+            return;
+        }
+        setLocSyncing(true);
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                setEditLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+                setLocSyncing(false);
+                setProfileMsg("Live location synced! Make sure to save changes.");
+            },
+            () => {
+                setLocSyncing(false);
+                setProfileMsg("Failed to get location. Please allow location access.");
+            }
+        );
     };
 
     const toggleSkill = (skill) => {
@@ -95,6 +126,9 @@ export default function WorkerProfile() {
     };
 
     const isOnline = user.availability !== false;
+    const isProfileComplete = (user.skills && user.skills.length > 0) && 
+                              (user.location && user.location.lat !== 0) && 
+                              (user.base_price > 0);
 
     return (
         <div className={styles.container}>
@@ -157,15 +191,27 @@ export default function WorkerProfile() {
                                         <span>{user.email}</span>
                                     </div>
                                 )}
-                                {user.location && (user.location.lat !== 0 || user.location.lng !== 0) && (
+                                {user.location && (user.location.lat !== 0 || user.location.lng !== 0) ? (
                                     <div className={styles.contactItem}>
                                         <FaMapMarkerAlt className={styles.contactIcon} />
                                         <span>{user.location.lat?.toFixed(4)}°N, {user.location.lng?.toFixed(4)}°E</span>
                                     </div>
+                                ) : (
+                                    <div className={styles.contactItem} style={{ color: '#dc2626' }}>
+                                        <FaMapMarkerAlt className={styles.contactIcon} />
+                                        <span>Location not set</span>
+                                    </div>
                                 )}
                             </div>
 
-                            <Button variant="outline" className={styles.editBtn} onClick={() => setEditMode(!editMode)}>
+                            <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid #e2e8f0', textAlign: 'center' }}>
+                                <div style={{ fontSize: 13, color: '#64748b', marginBottom: 4 }}>Base Service Rate</div>
+                                <div style={{ fontSize: 20, fontWeight: 700, color: '#059669' }}>
+                                    {user.base_price > 0 ? `Rs ${user.base_price}` : 'Not Set'}
+                                </div>
+                            </div>
+
+                            <Button variant="outline" className={styles.editBtn} onClick={() => setEditMode(!editMode)} style={{ marginTop: 16 }}>
                                 <FaUserEdit /> {editMode ? 'Cancel Edit' : 'Edit Details'}
                             </Button>
                         </Card>
@@ -179,6 +225,23 @@ export default function WorkerProfile() {
 
                     {/* ── Right column ───────────────────────────────────────── */}
                     <div className={styles.rightCol}>
+                        
+                        {!isProfileComplete && !editMode && (
+                            <div style={{
+                                background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: 12, 
+                                padding: 16, marginBottom: 20, display: 'flex', gap: 12, alignItems: 'flex-start'
+                            }}>
+                                <FaExclamationTriangle style={{ color: '#ef4444', fontSize: 20, flexShrink: 0, marginTop: 2 }} />
+                                <div>
+                                    <h4 style={{ color: '#991b1b', marginBottom: 4, fontSize: 15 }}>Action Required: Complete Your Profile</h4>
+                                    <p style={{ color: '#b91c1c', fontSize: 13, margin: 0, lineHeight: 1.5 }}>
+                                        You are currently <strong>invisible</strong> to the AI Matchmaking Engine. 
+                                        To start receiving job assignments from clients, click "Edit Details" and add your <strong>Skills</strong>, <strong>Base Price</strong>, and sync your <strong>Live Location</strong>.
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+
                         {/* Edit profile form */}
                         {editMode && (
                             <Card className={styles.servicesCard} style={{ marginBottom: 16 }}>
@@ -189,6 +252,15 @@ export default function WorkerProfile() {
                                         type="text"
                                         value={editName}
                                         onChange={(e) => setEditName(e.target.value)}
+                                        style={{ width: '100%', padding: '8px 12px', borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 14 }}
+                                    />
+                                </div>
+                                <div style={{ marginBottom: 12 }}>
+                                    <label style={{ fontSize: 13, fontWeight: 600, display: 'block', marginBottom: 4 }}>Base Price (Rs)</label>
+                                    <input
+                                        type="number"
+                                        value={editPrice}
+                                        onChange={(e) => setEditPrice(e.target.value)}
                                         style={{ width: '100%', padding: '8px 12px', borderRadius: 8, border: '1px solid #e2e8f0', fontSize: 14 }}
                                     />
                                 </div>
@@ -210,8 +282,20 @@ export default function WorkerProfile() {
                                         ))}
                                     </div>
                                 </div>
+                                <div style={{ marginBottom: 20 }}>
+                                    <label style={{ fontSize: 13, fontWeight: 600, display: 'block', marginBottom: 8 }}>Service Location (GPS)</label>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                                        <Button type="button" variant="outline" onClick={handleSyncLocation} disabled={locSyncing} style={{ fontSize: 13, padding: '6px 12px' }}>
+                                            {locSyncing ? <FaSpinner className="fa-spin" /> : <><FaCrosshairs style={{ marginRight: 6 }}/> Sync Live Location</>}
+                                        </Button>
+                                        <span style={{ fontSize: 13, color: (editLocation.lat !== 0) ? '#16a34a' : '#94a3b8', fontWeight: 600 }}>
+                                            {(editLocation.lat !== 0) ? <><FaCheckCircle /> Synced: {editLocation.lat.toFixed(4)}, {editLocation.lng.toFixed(4)}</> : 'No location synced yet'}
+                                        </span>
+                                    </div>
+                                </div>
+
                                 {profileMsg && (
-                                    <p style={{ fontSize: 13, color: profileMsg.includes('!') ? '#16a34a' : '#dc2626', marginBottom: 10 }}>
+                                    <p style={{ fontSize: 13, color: profileMsg.includes('!') ? '#16a34a' : '#dc2626', marginBottom: 16 }}>
                                         {profileMsg}
                                     </p>
                                 )}

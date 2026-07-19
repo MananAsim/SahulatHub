@@ -38,7 +38,7 @@ const createTask = async (req, res) => {
 // @access  Private (worker only)
 const getAvailableTasks = async (req, res) => {
     try {
-        const tasks = await Task.find({ status: 'open' })
+        const tasks = await Task.find({ status: 'open', isDeleted: { $ne: true } })
             .populate('client_id', 'name email rating location')
             .sort({ createdAt: -1 })
             .limit(100);
@@ -57,7 +57,7 @@ const getAvailableTasks = async (req, res) => {
 // Uses req.user.id from JWT or DEV_MODE header — never hardcoded.
 const getWorkerTasks = async (req, res) => {
     try {
-        const tasks = await Task.find({ assigned_worker_id: req.user.id })
+        const tasks = await Task.find({ assigned_worker_id: req.user.id, isDeleted: { $ne: true } })
             .populate('client_id', 'name email phone rating location')
             .sort({ createdAt: -1 })
             .limit(100);
@@ -116,11 +116,11 @@ const getUserTasks = async (req, res) => {
         let query;
 
         if (req.user.role === 'client') {
-            query = { client_id: req.user.id };
+            query = { client_id: req.user.id, isDeleted: { $ne: true } };
         } else if (req.user.role === 'worker') {
-            query = { assigned_worker_id: req.user.id };
+            query = { assigned_worker_id: req.user.id, isDeleted: { $ne: true } };
         } else if (req.user.role === 'admin') {
-            query = {}; // admin sees all tasks
+            query = { isDeleted: { $ne: true } }; // admin sees all non-deleted tasks
         } else {
             return res.status(403).json({ success: false, message: 'Invalid role' });
         }
@@ -143,7 +143,7 @@ const getUserTasks = async (req, res) => {
 // @access  Private
 const getTaskById = async (req, res) => {
     try {
-        const task = await Task.findById(req.params.id)
+        const task = await Task.findOne({ _id: req.params.id, isDeleted: { $ne: true } })
             .populate('client_id', 'name email rating')
             .populate('assigned_worker_id', 'name email phone rating skills');
 
@@ -330,5 +330,30 @@ const postTaskChat = async (req, res) => {
     }
 };
 
-module.exports = { createTask, getAvailableTasks, getWorkerTasks, updateTaskStatus, getUserTasks, getTaskById, assignTask, assignDemoTask, payTask, getTaskChat, postTaskChat };
+// @desc    Soft delete a task (hide from history)
+// @route   DELETE /api/tasks/:id
+// @access  Private (client only)
+const deleteTask = async (req, res) => {
+    try {
+        const task = await Task.findById(req.params.id);
+        if (!task) {
+            return res.status(404).json({ success: false, message: 'Task not found' });
+        }
+
+        // Only the client who created the task or admin can delete it
+        if (task.client_id.toString() !== req.user.id.toString() && req.user.role !== 'admin') {
+            return res.status(403).json({ success: false, message: 'Not authorized to delete this task' });
+        }
+
+        task.isDeleted = true;
+        await task.save();
+
+        res.status(200).json({ success: true, message: 'Task deleted successfully' });
+    } catch (error) {
+        console.error('Delete Task Error:', error.message);
+        res.status(500).json({ success: false, message: 'Server error', error: error.message });
+    }
+};
+
+module.exports = { createTask, getAvailableTasks, getWorkerTasks, updateTaskStatus, getUserTasks, getTaskById, assignTask, assignDemoTask, payTask, getTaskChat, postTaskChat, deleteTask };
 
