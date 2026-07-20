@@ -2,6 +2,12 @@ const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 const generateToken = require('../utils/generateToken');
 
+const normalizePhone = (phone) => {
+    if (!phone) return undefined;
+    const clean = phone.replace(/\s/g, '');
+    return clean.startsWith('+') ? clean : `+92${clean.replace(/^0+/, '')}`;
+};
+
 // @desc    Register a new user (client or worker)
 // @route   POST /api/auth/register
 // @access  Public
@@ -50,7 +56,7 @@ const register = async (req, res) => {
             }
         }
         if (phone) {
-            const normalizedPhone = phone.startsWith('+') ? phone : `+92${phone.replace(/^0+/, '')}`;
+            const normalizedPhone = normalizePhone(phone);
             const existingPhone = await User.findOne({ phone: normalizedPhone });
             if (existingPhone) {
                 return res.status(400).json({ success: false, message: 'Phone number is already registered' });
@@ -58,9 +64,7 @@ const register = async (req, res) => {
         }
 
         // ── Create user via .save() so pre-save bcrypt hook fires ─────────────
-        const normalizedPhone = phone
-            ? (phone.startsWith('+') ? phone : `+92${phone.replace(/^0+/, '')}`)
-            : undefined;
+        const normalizedPhone = normalizePhone(phone);
 
         const user = new User({
             name: name.trim(),
@@ -160,7 +164,7 @@ const workerLogin = async (req, res) => {
         }
 
         // Normalize phone: '03001234567' → '+923001234567'
-        const normalizedPhone = phone.startsWith('+') ? phone : `+92${phone.replace(/^0+/, '')}`;
+        const normalizedPhone = normalizePhone(phone);
 
         // Find worker by phone and include password for comparison
         const user = await User.findOne({ phone: normalizedPhone, role: 'worker' }).select('+password');
