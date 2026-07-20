@@ -120,7 +120,7 @@ function BookingContent() {
 
     // ── Widen radius & retry ───────────────────────────────────────────────────
     const handleWidenRadius = async () => {
-        const newRadius = Math.min(radius + 25, 200);
+        const newRadius = Math.min(radius + 50, 500);
         setRadius(newRadius);
         await handleFindMatches(null, newRadius);
     };
@@ -217,7 +217,7 @@ function BookingContent() {
                                 <input
                                     type="range"
                                     min="5"
-                                    max="200"
+                                    max="500"
                                     step="5"
                                     value={radius}
                                     onChange={(e) => setRadius(Number(e.target.value))}
@@ -225,7 +225,7 @@ function BookingContent() {
                                 />
                                 <div className={styles.radiusHints}>
                                     <span>5 km (local)</span>
-                                    <span>200 km (country-wide)</span>
+                                    <span>500 km (country-wide)</span>
                                 </div>
                                 <p className={styles.locationNote}>
                                     <FaMapMarkerAlt style={{ marginRight: 4 }} />
@@ -301,7 +301,7 @@ function BookingContent() {
                                 <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
                                     <Button onClick={handleWidenRadius} disabled={matchLoading}>
                                         {matchLoading ? <FaSpinner style={{ animation: 'spin 1s linear infinite' }} /> : (
-                                            <><FaMapMarkerAlt style={{ marginRight: 6 }} />Widen to {Math.min(radius + 25, 200)} km & Retry</>
+                                            <><FaMapMarkerAlt style={{ marginRight: 6 }} />Widen to {Math.min(radius + 50, 500)} km & Retry</>
                                         )}
                                     </Button>
                                     <Button variant="outline" onClick={() => setStep(1)}>
@@ -411,9 +411,9 @@ function BookingContent() {
                                 <Button variant="outline" onClick={() => setStep(1)}>
                                     ← Back to Details
                                 </Button>
-                                <Button variant="outline" onClick={handleWidenRadius} disabled={matchLoading || radius >= 200}>
+                                <Button variant="outline" onClick={handleWidenRadius} disabled={matchLoading || radius >= 500}>
                                     {matchLoading ? <FaSpinner style={{ animation: 'spin 1s linear infinite' }} /> : (
-                                        <><FaSearch style={{ marginRight: 6 }} />Widen radius ({Math.min(radius + 25, 200)} km)</>
+                                        <><FaSearch style={{ marginRight: 6 }} />Widen radius ({Math.min(radius + 50, 500)} km)</>
                                     )}
                                 </Button>
                             </div>
