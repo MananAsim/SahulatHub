@@ -24,7 +24,6 @@ const userSchema = new mongoose.Schema(
         },
         password: {
             type: String,
-            required: function() { return this.authProvider === 'local'; },
             minlength: 6,
             select: false,
         },
